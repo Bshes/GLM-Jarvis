@@ -629,3 +629,79 @@ Stage Summary:
 - The Turbopack/Lightning CSS issue is permanently resolved by the `--a_*` rename + Webpack switch.
 - All prior features (9 views, command palette, agent messaging, mobile bottom-nav,
   notification center, cycle history, console export, cycle search/filter) are intact.
+
+---
+Task ID: STYLE-4
+Agent: full-stack-developer (Agents polish)
+Task: Dramatically polished the Agents view agent cards — added task-share progress bars, rich iconified status badges, gradient header strips with large avatar icons, model-routing chips (Cpu/Cloud), deterministic last-active sparklines, and accent-colored hover lift/glow. Preserved the dispatch form and the entire inter-agent Message Bus untouched.
+
+Work Log:
+- Read worklog.md (HUD palette, `--a_*` CSS-var convention post-rename, oklch arbitrary-value rule, aeon-scroll, no indigo/blue) and the existing `src/components/aeon/agents-panel.tsx` (AgentsPanel + inline agent cards + dispatch form + Message Bus + MessageRow/EmptyBus/Stat).
+- Confirmed `AgentView` shape from `src/lib/aeon.ts` (name/role/description/status/color/tier/model/tasksDone/lastTask/lastActive) and that `TierBadge`/`AgentGlyph`/`timeAgo` from `@/components/aeon/ui` are reusable. Verified `--a_core/active/warn/danger/think/perceive/act/reflect` are defined in globals.css and that `aeon-pulse` keyframe exists; `aeon-stream` is a one-shot (not a shimmer) so I used a static gradient + glow on the progress fill instead.
+- Discovered a latent data bug: the DB still holds pre-rename agent colors (`var(--aeon-act)`, `var(--aeon-core)`, `var(--aeon-active)`, `var(--aeon-danger)`) which are now undefined CSS vars → all agent accents were silently falling back to inherited/transparent (the flat look the VLM dinged). Added a defensive `normalizeColor()` helper that maps `var(--aeon-X)` → `var(--a_X)` and applied it at every accent-color use site (AgentCard `color` prop, dispatch-button dots, `agentColor()` lookup for MessageRow). This makes the panel robust to both old and new DB values without touching the DB.
+- Extracted a new `AgentCard` component (previously inline in the map) with a clear props interface. Card structure top→bottom: (1) gradient header strip using the agent accent with a glow; (2) soft radial accent glow behind the avatar; (3) header row — 14×14 rounded-xl avatar with gradient bg + accent border + the agent icon, plus a status pip (5×5 circle) at the bottom-right corner showing the status color and icon (Loader2 spins when busy); name in accent-colored mono bold + role + a `StatusBadge` + `TierBadge`; (4) 2-line clamped description; (5) task-share progress bar — track + animated fill (motion width 0→pct%, accent gradient + glow), labeled `task share · N / total · pct%`; (6) footer row — model chip (Cpu=emerald/LOCAL or Cloud=amber/CLOUD) + model sub-label, then a right-aligned `ActivitySpark` + `Clock` + relative-time; (7) last-task footer with accent arrow.
+- Added `StatusBadge` — distinct icon+color+label per status: idle=Activity/muted, busy=Loader2(warn, spins)/orange, awaiting=Clock/core/amber, error=AlertTriangle/danger/rose, offline=PowerOff/muted, online=Activity/active. Rendered as a tinted pill with inset border via `color-mix`.
+- Added `ActivitySpark` — 12-bar deterministic sparkline (FNV-1a hash of agent name + tasksDone boost), rightmost bar full-opacity accent ("most recent"), others 42% accent. Gives each agent a unique stable "recent activity" silhouette.
+- Added `MODEL_META` (local: Cpu/emerald/LLAMA-3, cloud: Cloud/amber/CLAUDE-3.5) rendered as a bordered chip with icon + label + mono sub-label.
+- Hover effect: `motion.div` wrapper with `onHoverStart/End` → `animate={{ y: hovered ? -3 : 0 }}` spring lift; inline `boxShadow` on the Card swaps to an accent-colored glow + 1px accent ring on hover, and `borderColor` brightens to 55% accent. Used state (not `whileHover`) so the dynamic agent-color glow works.
+- Enhanced the 4 header `Stat` cards with a leading icon (Activity/Loader2-spin/Circle/Cpu) in the accent color, kept the existing left accent rail.
+- Preserved the entire dispatch-directive Card (agent chip buttons, Textarea, Dispatch/Sync buttons) and the full Message Bus section (thread + MessageRow + compose form + EmptyBus) verbatim — only the agent-cards grid above them was redesigned.
+- Color convention compliance: oklch values in arbitrary Tailwind classes (`bg-[oklch(0.82_0.15_75)]/10`, `text-[oklch(0.74_0.16_158)]`), `var(--a_*)` only in inline styles, no indigo/blue introduced.
+- Responsive: agent grid is `grid-cols-1 md:grid-cols-2`; card internals use `flex-wrap` for the badge/chip rows and `min-w-0`/`truncate` on name/role/last-task so long content never overflows.
+- Ran `bun run lint` → 0 errors, 0 warnings. Dev server (`/`) returns 200; `/api/aeon/status` returns 200 with the 4 agents.
+
+Stage Summary:
+- Artifact: `src/components/aeon/agents-panel.tsx` — single file, fully rewritten agent-cards section + new `AgentCard`/`StatusBadge`/`ActivitySpark` components and a `normalizeColor` helper; dispatch form and Message Bus preserved verbatim.
+- All 7 requirements implemented: (1) task-share progress bars per agent (animated, accent-colored, labeled N/total·pct%); (2) rich iconified status badges with distinct colors per status; (3) profile-card visual hierarchy with gradient header strip + large 14×14 avatar + 2-col-ish header; (4) model chips (Cpu/LOCAL=emerald, Cloud/CLOUD=amber); (5) last-active timeline via deterministic sparkline + prominent Clock-icon relative time; (6) accent-colored hover lift+glow; (7) Message Bus section untouched and still fully functional.
+- Latent DB color bug (pre-rename `var(--aeon-*)` values) fixed defensively at the component layer so accents now render correctly. Lint clean (0 errors), no indigo/blue, mobile-first responsive.
+
+---
+Task ID: REVIEW-5 (cron webDevReview)
+Agent: orchestrator (Z.ai Code)
+Task: Cron review — QA, build Settings view (new feature), polish Agents view.
+
+Work Log:
+- Pre-flight: dev server + stream service up, home 200, lint clean.
+- agent-browser QA: all 9 views render with 0 errors. No bugs.
+- VLM comparative assessment (glm-4.6v): Core=8, Agents=7, Memory=8, Sensory=7,
+  Actions=7, Triggers=8, IoT=8, Console=8, Logs=6. No visual bugs. Weakest: Logs(6),
+  Agents(7).
+
+New feature built:
+1. **Settings/Preferences view** (10th view) — `src/components/aeon/settings-panel.tsx`:
+   - **Routing config**: cloud-routing threshold slider (0.10-0.90), chain-of-thought
+     threshold slider (0.50-0.95), live complexity-spectrum visualization (LOCAL→CLOUD→THINKING
+     bands with threshold markers).
+   - **Trigger config**: cooldown slider (5-120s), auto-evaluate toggle, safety-tier policy note.
+   - **Data management**: clear Logs/Cycles/Chat/Actions/Messages buttons, Re-seed All with
+     confirmation dialog (AlertDialog).
+   - **About**: system info (version, architecture, models, memory, safety, framework, realtime),
+     cognitive-loop summary.
+   - API: `GET/PATCH /api/aeon/settings` (Setting key/value model), `POST /api/aeon/data`
+     (clearLogs/clearCycles/clearChat/clearActions/clearMessages/reseed).
+   - Wired into shell NAV + view switch + mobile bottom-nav + command palette.
+   - VLM rated 8/10.
+
+Styling polish:
+2. **Agents view** — polished by subagent (STYLE-4):
+   - Profile-card redesign: gradient header strip, large 14×14 gradient avatar with status pip,
+     rich StatusBadge (distinct icon+color per status), TierBadge, animated task-share progress
+     bar, model chip (Cpu=LOCAL/Cloud=CLOUD), 12-bar ActivitySpark, Clock-icon relative time.
+   - Hover: cards lift -3px + glow in agent's accent color.
+   - Fixed latent data bug: DB seed still held pre-rename `var(--aeon-*)` colors (now undefined
+     after the --a_* rename) — added normalizeColor() helper mapping var(--aeon-X)→var(--a_X).
+   - Message Bus section preserved verbatim.
+   - VLM rated 9/10 (up from 7/10).
+
+Verification:
+- Settings API: save (PATCH) → ok; read (GET) → correct values; data clear → ok.
+- All 10 views render with 0 browser errors. Lint clean (0 errors).
+- Mobile 375x812: no horizontal overflow, sticky footer pushes naturally (bodyH 1749).
+- VLM: Agents 9/10, Settings 8/10, no visual bugs.
+
+Stage Summary:
+- A.E.O.N. now has 10 views (added Settings). Agents view polished to 9/10.
+- All features verified end-to-end. Lint clean, 0 errors, responsive verified.
+- Unresolved / next-phase: polish Logs view (rated 6/10 — ensure all severity colors render
+  with sample data), vector memory visualization, real VLM image analysis, OAuth multi-user,
+  dark/light theme toggle.

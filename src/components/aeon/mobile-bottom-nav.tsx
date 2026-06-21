@@ -27,6 +27,7 @@ import {
   Zap,
   House,
   MessageSquare,
+  Settings,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 
@@ -40,6 +41,7 @@ const NAV: { id: View; label: string; icon: React.ElementType }[] = [
   { id: "iot", label: "IoT", icon: House },
   { id: "console", label: "Console", icon: MessageSquare },
   { id: "logs", label: "Logs", icon: Terminal },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export function MobileBottomNav() {

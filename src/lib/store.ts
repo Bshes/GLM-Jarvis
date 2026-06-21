@@ -28,7 +28,8 @@ export type View =
   | "logs"
   | "triggers"
   | "iot"
-  | "console";
+  | "console"
+  | "settings";
 
 export interface StatusSnapshot {
   agents: AgentView[];

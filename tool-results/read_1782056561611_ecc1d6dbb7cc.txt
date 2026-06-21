@@ -1,0 +1,632 @@
+     1→     1→# A.E.O.N. — Worklog
+     2→     2→
+     3→     3→## Project Status
+     4→     4→A.E.O.N. is being built as a **Next.js 16 + TypeScript** autonomous AI orchestrator
+     5→     5→dashboard (the sandbox cannot run Python/Docker/Neo4j, so the Python spec was
+     6→     6→faithfully adapted to this stack). It implements the full cognitive architecture:
+     7→     7→PERCEIVE → THINK → ACT → REFLECT loop, multi-agent orchestration, graph + vector
+     8→     8→memory, LLM complexity routing, three-tier safety execution, anticipatory
+     9→     9→triggers, and real-time WebSocket streaming.
+    10→    10→
+    11→    11→## Completed (Foundation + Backend)
+    12→    12→- **Design system** `src/app/globals.css`: dark HUD palette (amber core, emerald
+    13→    13→  active, rose danger — NO indigo/blue), grid/radial backgrounds, glow/scanline
+    14→    14→  utilities, custom scrollbars, animations (pulse/spin/flicker/stream/dash).
+    15→    15→- **Prisma schema** `prisma/schema.prisma`: GraphNode, Edge, Memory (with
+    16→    16→  embedding), Agent, Action, LogEntry, SensoryEvent, Trigger, Device, Setting.
+    17→    17→  DB pushed + seeded (4 agents, 8 devices, 12 nodes/11 edges, 7 memories,
+    18→    18→  4 triggers).
+    19→    19→- **Layout** `src/app/layout.tsx`: Geist fonts, dark by default, A.E.O.N. metadata.
+    20→    20→- **Lib**: `src/lib/aeon.ts` (types/constants: LOOP_PHASES, PHASE_META, TIER_META),
+    21→    21→  `src/lib/zai.ts` (ZAI SDK singleton + chat/chatJSON/webSearch/tts/asr helpers),
+    22→    22→  `src/lib/router.ts` (complexity classifier → local vs cloud route),
+    23→    23→  `src/lib/embed.ts` (deterministic 128-dim hashed bag-of-words + cosine),
+    24→    24→  `src/lib/logger.ts` (DB log + emit to stream service), `src/lib/store.ts`
+    25→    25→  (Zustand: snapshot, live stream, phase, actions, confirm modal, dispatch).
+    26→    26→- **Mini-service** `mini-services/aeon-stream/index.ts`: socket.io on :3003
+    27→    27→  (path "/", browser-facing via gateway), plain-HTTP /emit on :3004 (internal,
+    28→    28→  server-to-server). Ring buffer of 200 events, warm replay to new clients.
+    29→    29→  RUNNING.
+    30→    30→- **API routes** under `src/app/api/aeon/`:
+    31→    31→  - `orchestrate` — the brain: PERCEIVE (recall) → THINK (route + LLM JSON plan)
+    32→    32→    → ACT (tiered action persist/execute; IoT tier-1 applies device state) →
+    33→    33→    REFLECT (store memory). Emits live events at each phase.
+    34→    34→  - `status`, `logs`, `agents`, `actions`, `actions/[id]` (confirm/deny gate),
+    35→    35→    `iot`, `triggers`, `triggers/evaluate` (anticipatory engine), `events`,
+    36→    36→    `memory`, `memory/search` (vector recall), `llm`, `websearch`, `tts`, `asr`,
+    37→    37→    `seed`.
+    38→    38→- **Frontend infra**: `src/hooks/use-aeon-stream.ts` (socket client, gateway via
+    39→    39→  `?XTransformPort=3003`), `src/components/aeon/ui.tsx` (PhasePill, TierBadge,
+    40→    40→  StatusDot, timeAgo, agentIcon).
+    41→    41→
+    42→    42→## In Progress (Frontend panels)
+    43→    43→- App shell + state store + sticky footer (in progress by orchestrator).
+    44→    44→- Core orchestrator visualization, agents, sensory, actions, logs panels (by orchestrator).
+    45→    45→- Memory Graph, IoT, Triggers panels (delegated to subagents 6a/6b/6c).
+    46→    46→
+    47→    47→## Conventions for all panel components
+    48→    48→- All panels live in `src/components/aeon/`.
+    49→    49→- Use the Zustand store: `import { useAeon } from "@/lib/store"`.
+    50→    50→- Shared types from `@/lib/aeon`; shared primitives from `@/components/aeon/ui`
+    51→    51→  (PhasePill, TierBadge, StatusDot, timeAgo, agentIcon).
+    52→    52→- shadcn/ui components are in `@/components/ui/*`.
+    53→    53→- Color via CSS vars: `var(--aeon-core)` amber, `var(--aeon-active)` emerald,
+    54→    54→  `var(--aeon-warn)` orange, `var(--aeon-danger)` rose. NO indigo/blue.
+    55→    55→- API base: all routes under `/api/aeon/*` (relative paths).
+    56→    56→- Panels must be responsive (mobile-first) and use the `aeon-scroll` scrollbar class
+    57→    57→  for scrollable lists.
+    58→    58→
+    59→    59→## Unresolved / Next
+    60→    60→- Build remaining panels, wire into `src/app/page.tsx`, lint, agent-browser verify.
+    61→    61→
+    62→    62→---
+    63→    63→Task ID: 6-b
+    64→    64→Agent: full-stack-developer (IoT panel)
+    65→    65→Task: Built the A.E.O.N. IoT smart-home control panel (`src/components/aeon/iot-panel.tsx`) — a fully interactive, responsive control surface for simulated devices persisted via `/api/aeon/iot`.
+    66→    66→
+    67→    67→Work Log:
+    68→    68→- Read worklog + store.ts + aeon.ts + iot route + ui.tsx + globals.css + seed route to lock in conventions (HUD palette, StatusDot, DeviceView shape, JSON-string state, optimistic-then-refresh pattern).
+    69→    69→- Defined per-family state types (Light/Thermostat/Lock/Blinds/Speaker/Camera) and a `TYPE_META` map (color + lucide icon + mono label) for HUD color-coding — amber for light/speaker, orange for climate, emerald for locks, rose-plum for blinds, rose for cameras. NO indigo/blue.
+    70→    70→- Built `useDeviceControl` hook: optimistic local mutation via `useAeon.setState({ devices })` (bypasses setDevices so `pendingActions` isn't reset), per-device syncing Set, then PATCH `/api/aeon/iot` with `{ id, state }` and a final `refresh()` sync. Plus `batchUpdate` for scenes (parallel Promise.all) and `runScene` with a brief active-scene linger for visual feedback.
+    71→    71→- Implemented 5 scene quick-actions (Movie Night, Away, Focus, Sleep, Wake Up) — each `build(devices)` returns a list of `{id, state}` patches filtered by type/room.
+    72→    72→- Implemented `ControlShell` (accent strip that glows when device is active, type icon chip, name, mono type label, syncing spinner with AnimatePresence, StatusDot for online/offline, dimmed+disabled when offline) and one control per family: LightControl (Switch + brightness Slider + warm/cool toggle buttons), ThermostatControl (temp stepper 16-28 + mode Select heat/cool/auto/off), LockControl (single tap button with Lock/LockOpen swap + emerald=locked / orange=unlocked), BlindsControl (open% Slider), SpeakerControl (Switch + volume Slider), CameraControl (recording Switch + motion indicator with pulsing Radio icon, DETECTED/CLEAR).
+    73→    73→- Wired IoTPanel: header with `Activity` icon, "IoT Control Surface" title, online/total badge + manual Sync button, Scenes row, Separator, then `aeon-scroll` room list. Rooms are memo-grouped + sorted alphabetically; each RoomCard shows room name + "n DEV · m LIVE" badge and a responsive device grid (1 col mobile → 2 col sm → 3 col 2xl). Rooms grid is 1 col → 2 col on 2xl. Empty state shows WifiOff + seed hint.
+    74→    74→- Framer Motion used for ControlShell layout/initial/animate (offline dims to 0.45 opacity) and syncing badge transitions. Responsive mobile-first throughout (touch-friendly 7x7 steppers, h-7 switches, wrap-friendly scenes row).
+    75→    75→- Lint: `bunx eslint src/components/aeon/iot-panel.tsx` passes clean (0 errors, 0 warnings). Dev.log shows clean compilation; seed → 8 devices → /api/aeon/status returning them, so the panel will have live data.
+    76→    76→
+    77→    77→Stage Summary:
+    78→    78→- Artifact: `src/components/aeon/iot-panel.tsx` (single self-contained `"use client"` component, default + named export `IoTPanel`).
+    79→    79→- Every control persists via PATCH and reflects in the UI through the optimistic-then-refresh flow; scenes batch-update across devices in parallel.
+    80→    80→- Did NOT touch page.tsx, layout.tsx, globals.css, store.ts, or the iot API route. Only created `iot-panel.tsx` as instructed.
+    81→    81→- Pre-existing lint error in `triggers-panel.tsx` (AgentIcon created during render) is unrelated to this task and was left untouched.
+    82→    82→
+    83→    83→---
+    84→    84→Task ID: 6-a
+    85→    85→Agent: full-stack-developer (Memory Graph panel)
+    86→    86→Task: Built the Memory Graph panel — an interactive force-directed graph
+    87→    87→visualization of A.E.O.N.'s graph memory (GraphNode + Edge) layered with a
+    88→    88→vector-memory semantic recall search box. Centerpiece "memory" view in the
+    89→    89→HUD dashboard.
+    90→    90→
+    91→    91→Work Log:
+    92→    92→- Read worklog.md for conventions; inspected the existing
+    93→    93→  /api/aeon/memory route.ts and /api/aeon/memory/search/route.ts to confirm
+    94→    94→  the POST contracts (node/edge/memory + vector search). Neither needed
+    95→    95→  modification — the existing endpoints already satisfy the panel's needs.
+    96→    96→- Inspected lib/aeon.ts (GraphNodeView / EdgeView / MemoryView types),
+    97→    97→  lib/store.ts (useAeon: graph, memoryCount, refresh), components/aeon/ui.tsx
+    98→    98→  (timeAgo helper), and globals.css (HUD palette + aeon-scroll/aeon-grid-bg/
+    99→    99→  aeon-radial-bg/aeon-scanline/aeon-text-glow utilities + animation keyframes).
+   100→   100→- Inspected the seed route to confirm a "User" person node exists (for pinning).
+   101→   101→- Created src/components/aeon/memory-graph-panel.tsx as a single default-exported
+   102→   102→  "use client" component (MemoryGraphPanel).
+   103→   103→- Implemented a from-scratch TypeScript force simulation:
+   104→   104→  • Coulomb repulsion (O(n²)) between all node pairs
+   105→   105→  • Hooke spring attraction along edges (rest length 120px)
+   106→   106→  • Centering force toward the SVG centroid
+   107→   107→  • Velocity damping + soft bounding walls
+   108→   108→  • Cooling alpha that decays from 1 → 0 over ~2.2s (reheats on graph/resize/drag)
+   109→   109→  • requestAnimationFrame loop via a loopRef pattern so the latest closure is
+   110→   110→    always invoked, with auto-stop when the lattice is at rest
+   111→   111→- SVG rendering: nodes are layered (outer halo + mid glow + solid core) colored
+   112→   112→  by kind via the aeon palette vars (entity=amber, concept=emerald,
+   113→   113→  person=orange, place=rose, event=rose-plum, device=muted gold, agent=lime).
+   114→   114→  Edges are dashed lines with mono-font relation labels offset perpendicular
+   115→   115→  to the line for legibility. Selected node + its neighbors are highlighted;
+   116→   116→  non-neighbors dim to 32% opacity. Pinned "User" node has a spinning dashed
+   117→   117→  ring (animate-aeon-spin-slow with transform-box: fill-box).
+   118→   118→- Mouse + touch dragging via Pointer Events: setPointerCapture on the SVG,
+   119→   119→  pointer-move updates node position directly (skips physics), pointer-up
+   120→   120→  releases the node and reheats alpha=0.5.
+   121→   121→- Side panel with three Framer Motion-animated tabs (layoutId underline):
+   122→   122→  • Nodes: clickable list with kind icons + PIN badge for User; selected node
+   123→   123→    detail panel slides open showing summary + relations (clickable to navigate).
+   124→   124→  • Add: label Input + kind Select (7 kinds) + summary Input → POST
+   125→   125→    /api/aeon/memory {kind:"node",label,nodeKind,summary} then refresh().
+   126→   126→  • Recall: query Input + k Select (3/6/10/15) + Recall button → POST
+   127→   127→    /api/aeon/memory/search {query,k}; results render with relevance gradient
+   128→   128→    bar (active→core), kind badge, source, relative time, and tag chips.
+   129→   129→- Header: stat chips for NODES, EDGES, VECTORS (memoryCount) using kind-colored
+   130→   130→  inset shadows. HUD corner annotations ("FORCE-DIRECTED LATTICE" + live α).
+   131→   131→- Responsive: flex-col on mobile (graph min-h-300px + side panel min-h-260px),
+   132→   132→  flex-row on lg (graph flex-1 + side panel w-368px). aeon-scroll class on all
+   133→   133→  scrollable lists. touch-none on the SVG to prevent scroll-jacking during drag.
+   134→   134→- Lint: 0 errors, 0 warnings in the new file (cleaned 2 unused eslint-disables).
+   135→   135→  Dev server compiles the file cleanly.
+   136→   136→
+   137→   137→Stage Summary:
+   138→   138→- Artifact: src/components/aeon/memory-graph-panel.tsx (single file, ~820 lines).
+   139→   139→- No new API routes needed — reuses existing /api/aeon/memory (GET/POST) and
+   140→   140→  /api/aeon/memory/search (POST) as-is.
+   141→   141→- No modifications to page.tsx, layout.tsx, globals.css, or store.ts.
+   142→   142→- Ready to be imported into src/app/page.tsx by the orchestrator and rendered
+   143→   143→  when view === "memory".
+   144→   144→
+   145→   145→---
+   146→   146→Task ID: 6-c
+   147→   147→Agent: full-stack-developer (Triggers panel)
+   148→   148→Task: Built the Anticipatory Triggers panel (`src/components/aeon/triggers-panel.tsx`) — A.E.O.N.'s anticipatory execution contract UI. Operators can browse/arm/disarm/delete triggers, create new triggers (modal), inject simulated sensory events to fire triggers live, run the anticipatory engine, and watch the recent sensory feed.
+   149→   149→
+   150→   150→Work Log:
+   151→   151→- Read worklog, `@/lib/aeon` types, `@/lib/store`, `@/components/aeon/ui`, the three API routes (`triggers`, `triggers/evaluate`, `events`), `globals.css`, and the shadcn primitives (Card, Dialog, Select, Switch, Input, Textarea, Label, Separator, sonner).
+   152→   152→- Designed a mobile-first responsive layout: HUD header with stat tiles (total / armed / fired / last-1h), a 3-column main grid (trigger list spans 2 cols on lg; right sidebar hosts the sensory injector + recent feed), with `aeon-grid-bg` backdrop and `aeon-scroll` styled scrollbars.
+   153→   153→- Implemented `TriggerCard` with channel-color-coded top accent strip, custom `ChannelBadge` (icon + label, color-mix inline styling per channel: biometric→rose, vision→emerald, audio→amber, time→orange, system→muted), `TierBadge`, readably-rendered condition (`metric OP threshold` via `renderCondition` helper), agent glyph, action description, fire count, last-fired relative time, and Switch + delete controls (PATCH/DELETE `/api/aeon/triggers` then `refresh()`).
+   154→   154→- Implemented `CreateTriggerDialog` with full form (name/channel/metric/operator/threshold/agentName/action/tier), live contract preview, channel-aware metric datalist suggestions, and POST → `refresh()` → sonner toast on success.
+   155→   155→- Implemented `SensoryInjector` (channel/metric/value form, value validated as numeric) that POSTs to `/api/aeon/events`, immediately calls GET `/api/aeon/triggers/evaluate`, then `refresh()`. Toasts the fired triggers (or "no match / cooldown") and tracks fired trigger names in a `recentlyFired` Set for visual highlight.
+   156→   156→- Implemented `SensoryFeed` — last 15 observations with severity dot, channel icon, parsed metric+value (from JSON `value` field via `parseSensoryValue` try/catch), channel/severity caption, and relative time.
+   157→   157→- Implemented "Run anticipatory check" header button → GET `/api/aeon/triggers/evaluate` → toasts result and highlights fired cards (emerald ring + `animate-aeon-pulse`) for 6 seconds.
+   158→   158→- Refactored the agent-icon lookup into a local `AGENT_ICONS_LOCAL` map + `AgentGlyph` component to satisfy `react-hooks/static-components` (function-call-returning-component trips the rule; property access on a stable map doesn't).
+   159→   159→- Mounted sonner `<Toaster />` locally inside the panel (with mono-font styling) so toasts render even though the global `layout.tsx` only wires the radix toaster. Did not touch `layout.tsx`/`page.tsx`/`globals.css`/`store.ts`/API routes.
+   160→   160→- Lint clean (`bun run lint` → 0 errors in this file; only a pre-existing warning in `use-aeon-stream.ts`).
+   161→   161→
+   162→   162→Stage Summary:
+   163→   163→- Artifact: `/home/z/my-project/src/components/aeon/triggers-panel.tsx` — default export `TriggersPanel`, fully typed, responsive, HUD-styled, framer-motion transitions, sonner toasts.
+   164→   164→- End-to-end anticipatory loop wired: inject → POST events → GET evaluate → refresh → toast fired triggers + emerald pulse highlight on matching cards. Toggle/delete/create mutations all call `refresh()`.
+   165→   165→- No other files modified. Ready to be imported by the orchestrator's app shell via `import TriggersPanel from "@/components/aeon/triggers-panel"`.
+   166→   166→
+   167→   167→---
+   168→   168→Task ID: FINAL
+   169→   169→Agent: orchestrator (Z.ai Code)
+   170→   170→Task: Complete A.E.O.N. frontend, integration, lint, and agent-browser self-verification.
+   171→   171→
+   172→   172→Work Log:
+   173→   173→- Built remaining panels: core-view (animated PERCEIVE-THINK-ACT-REFLECT orb + dispatch
+   174→   174→  console + live cognition stream), agents-panel (sub-agent roster + dispatch),
+   175→   175→  actions-panel (tiered queue + CONFIRMATIVE GATE safety modal), sensory-panel
+   176→   176→  (Whisper-style voice ASR + TTS playback + biometric/vision injection + feed),
+   177→   177→  logs-terminal (filterable structured log), aeon-shell (status bar, sidebar nav,
+   178→   178→  view router, sticky footer, global sonner Toaster).
+   179→   179→- Wired Zustand store + socket.io stream hook (gateway via ?XTransformPort=3003).
+   180→   180→- Fixed: default vs named export mismatches for subagent panels; `"use client">` typo
+   181→   181→  in two files; react-hooks/static-components via AgentGlyph wrapper; removed
+   182→   182→  duplicate local sonner Toaster from triggers panel; reactive state selectors.
+   183→   183→- Lint: clean (0 errors).
+   184→   184→- Agent-browser golden-path verification:
+   185→   185→  * Core view renders (animated core, 4 phase nodes, stats, suggestions).
+   186→   186→  * Ran T1 directive "Dim the living room to 30% warm" → cycle completed in 4.6s;
+   187→   187→    router classified complexity 0.18 → local llama-3.1; IoT agent executed; device
+   188→   188→    state actually changed (brightness 30, color warm, color_temperature 2700).
+   189→   189→  * Ran T2 directive "Pay the electricity bill" → pending action created; Approve
+   190→   190→    opened "CONFIRMATIVE GATE — TIER 2" modal; approved → executed.
+   191→   191→  * Anticipatory: injected heart_rate=125 → "Focus-break reminder" T1 trigger fired
+   192→   192→    autonomously (no user prompting).
+   193→   193→  * All 8 views render without console/runtime errors.
+   194→   194→  * Responsive: desktop 1440x900 + mobile 375x812, no horizontal overflow.
+   195→   195→  * Sticky footer: gap=0 on short pages, natural push on long pages; header sticky.
+   196→   196→
+   197→   197→Stage Summary:
+   198→   198→- A.E.O.N. is fully functional and verified. The cognitive architecture
+   199→   199→  (PERCEIVE→THINK→ACT→REFLECT), LLM complexity routing, graph + vector memory,
+   200→   200→  three-tier safety execution with human-in-the-loop gate, anticipatory triggers,
+   201→   201→  multimodal sensory I/O (ASR/TTS), IoT control, and real-time WebSocket streaming
+   202→   202→  all work end-to-end. Stream mini-service running on :3003 (socket.io) + :3004
+   203→   203→  (emit). DB seeded. Dev server on :3000, lint clean, no runtime errors.
+   204→   204→- Unresolved / next-phase opportunities: richer agent collaboration (agent-to-agent
+   205→   205→  messaging), persistent cycle history view, vector memory visualization, real
+   206→   206→  vision/VLM image analysis on uploaded camera frames, OAuth-backed multi-user
+   207→   207→  operator profiles, and a mobile bottom-nav variant.
+   208→   208→
+   209→   209→---
+   210→   210→Task ID: REVIEW-1 (cron webDevReview)
+   211→   211→Agent: orchestrator (Z.ai Code)
+   212→   212→Task: Cron-triggered review — QA via agent-browser, fix issues, improve styling, add features.
+   213→   213→
+   214→   214→Work Log:
+   215→   215→- Reviewed worklog.md: A.E.O.N. was complete and verified from prior session.
+   216→   216→- Pre-flight checks: dev server running, stream service healthy (44 events buffered),
+   217→   217→  home 200, lint clean.
+   218→   218→- agent-browser QA pass: opened app, cycled all 8 views — 0 console/runtime errors.
+   219→   219→- VLM assessment of Core view (glm-4.6v): identified empty space when idle, sparse
+   220→   220→  stream panel, static hexagon glow, low footer contrast.
+   221→   221→- Decision: system stable (no bugs) → focused this round on (a) styling polish and
+   222→   222→  (b) new features per the mandatory requirements.
+   223→   223→
+   224→   224→New features built:
+   225→   225→1. **Cycle History persistence + timeline** (new feature)
+   226→   226→   - Prisma model `CycleHistory` added + pushed (cycleId, input, perception, thought,
+   227→   227→     reflection, routing JSON, route, complexity, model, thinking, durationMs,
+   228→   228→     actionCount, memoriesCreated, outcome).
+   229→   229→   - `/api/aeon/orchestrate` now persists every completed cycle to history.
+   230→   230→   - `/api/aeon/cycles` GET route (list recent, ?take=N).
+   231→   231→   - `CycleTimeline` component: horizontal scrolling strip of cycle cards on the Core
+   232→   232→     view (color-coded by outcome, complexity bar, route badge, metrics); click a card
+   233→   233→     to expand a full PERCEIVE/THINK/ACT/REFLECT transcript drawer.
+   234→   234→   - Store: `cycles`, `refreshCycles`, `selectedCycle`, `selectCycle`; bootstrap + dispatch
+   235→   235→     now side-load/refresh cycles.
+   236→   236→2. **LLM Direct Console** (new view)
+   237→   237→   - `/api/aeon/chat` POST (message, useHistory, useWebSearch) + GET (history).
+   238→   238→   - Persists user + assistant turns to new `ChatTurn` Prisma model.
+   239→   239→   - Optional web_search tool: fetches fresh results via SDK, augments prompt, cites [n].
+   240→   240→   - Optional conversation history (multi-turn) from prior turns.
+   241→   241→   - `ConsolePanel` component: chat thread with user/assistant bubbles, markdown
+   242→   242→     rendering (react-markdown), routing badge + complexity bar + thinking indicator
+   243→   243→     on each user turn, web-search citation chips, suggestions sidebar, routing-policy
+   244→   244→     legend. Stats: turns / local routes / cloud routes / web searches.
+   245→   245→   - Added "console" to View type + NAV (MessageSquare icon) + shell view switch.
+   246→   246→
+   247→   247→Styling polish (per VLM findings):
+   248→   248→3. **Core view idle-state**: replaced sparse "awaiting input" with `TelemetryIdle` —
+   249→   249→   animated SVG sparklines (CPU load / MEM pressure / NET I/O) updating every 0.9s,
+   250→   250→   4-stat readout (agents/memories/cycles/status), "cognitive loop primed" indicator.
+   251→   251→4. **Footer contrast**: stream pill now has bg tint + semibold; event text bumped to
+   252→   252→   foreground/80; buffered count + A.E.O.N. CORE label brightened to foreground/70.
+   253→   253→5. **Cycle timeline cards**: accent strip, outcome color, complexity bar, hover glow.
+   254→   254→
+   255→   255→Verification (agent-browser + VLM):
+   256→   256→- Home 200, /api/aeon/cycles 200, /api/aeon/chat 200. Lint clean (0 errors).
+   257→   257→- Ran orchestration cycle "Set the office blinds to 60% open" → local route, executed,
+   258→   258→  2.9s → persisted to CycleHistory → appeared in timeline. Clicked card → detail drawer
+   259→   259→  expanded with full transcript.
+   260→   260→- Console: clicked suggestion "Explain how your PERCEIVE-THINK-ACT-REFLECT loop" → LLM
+   261→   261→  responded with structured markdown; routing badge showed LOCAL · llama-3.1-local.
+   262→   262→- Chat API direct: "What is 2+2?" → local, complexity 0.18, 321ms, "2 + 2 = 4".
+   263→   263→- VLM on improved Core: "idle state visually richer with telemetry sparklines; cycle
+   264→   264→  history timeline polished; no major visual issues."
+   265→   265→- VLM on Console: "polished chat thread, clear routing badge, proper markdown, no issues."
+   266→   266→- All 9 views render with 0 errors. Mobile 375x812: no horizontal overflow, footer
+   267→   267→  pushes down naturally (bodyH 3510), Console renders.
+   268→   268→
+   269→   269→Incident & resolution:
+   270→   270→- After adding the new Prisma models, the dev server's global PrismaClient singleton was
+   271→   271→  stale (cached pre-new-models) → /api/aeon/cycles + /api/aeon/chat returned 500
+   272→   272→  ("Cannot read properties of undefined (reading 'findMany')"). `bun run db:generate` +
+   273→   273→  touching db.ts did not invalidate the global. Killed the dev server to force a fresh
+   274→   274→  client load; the system supervisor did not auto-restart it, so restarted `bun run dev`
+   275→   275→  in the background to restore service. All endpoints then returned 200.
+   276→   276→
+   277→   277→Stage Summary:
+   278→   278→- A.E.O.N. now has 9 views (added Console), persistent cycle history with an interactive
+   279→   279→  timeline + transcript drawer, a direct-LLM console with routing transparency + web
+   280→   280→  search tool, animated telemetry in the Core idle-state, and improved footer contrast.
+   281→   281→- Lint clean, 0 runtime errors, agent-browser + VLM verified across desktop + mobile.
+   282→   282→- Unresolved / next-phase opportunities: agent-to-agent messaging, vector memory
+   283→   283→  visualization, real VLM image analysis on camera frames, OAuth multi-user, mobile
+   284→   284→  bottom-nav, cycle history filtering/search, console conversation export.
+   285→   285→
+   286→   286→---
+   287→   287→Task ID: STYLE-2
+   288→   288→Agent: full-stack-developer (Logs polish)
+   289→   289→Task: Dramatically improved the LogsTerminal visual quality — replaced the plain text list with a syntax-highlighted, badge-rich, collapsible-grouped, live-tail-equipped observability surface.
+   290→   290→
+   291→   291→Work Log:
+   292→   292→- Read worklog.md, globals.css (HUD palette vars, aeon-scroll, animation keyframes), store.ts (LogView shape, pushEvent log derivation), aeon.ts (LogView type), ui.tsx (timeAgo, StatusDot, TierBadge), and the existing logs-terminal.tsx (plain text list with minimal styling).
+   293→   293→- Designed a LEVEL_META taxonomy mapping each level to color, background tint, border color, lucide icon, and optional glow — ERROR gets pulsing rose glow, WARN amber, INFO emerald, DEBUG muted.
+   294→   294→- Implemented SeverityBadge: rich inline badge per level with lucide icon + inset border + level text; ERROR badge includes a pulsing dot (animate-aeon-pulse).
+   295→   295→- Implemented LogRow with: colored left accent strip (2.5px solid), per-level background tint, optional ERROR pulsing box-shadow glow + inset danger background, framer-motion entrance animation (opacity + x slide).
+   296→   296→- Implemented LogTimestamp: shows relative time ("2s ago") prominently via timeAgo(), with absolute timestamp in a radix Tooltip on hover. Monospace tabular-nums styling.
+   297→   297→- Implemented SparkBar: mini 4-bar sparkline next to each level filter button, bar heights proportional to count/max, progressive opacity from muted to full color.
+   298→   298→- Implemented SourceGroupSection: collapsible group by source with chevron toggle, colored indicator dot (dominant level color), entry count, mini level distribution pills, framer-motion AnimatePresence height animation. Groups sorted by dominant-level priority then count. Top 3 auto-expanded.
+   299→   299→- Implemented LiveTailIndicator: pulsing emerald dot + "LIVE" badge + "+N" new-entry counter. Appears in the terminal title bar when new logs arrive since last scroll. Resets on scroll.
+   300→   300→- Implemented EmptyState: Terminal icon + animated blinking block cursor (animate-aeon-blink) + "awaiting log entries…" text.
+   301→   301→- Implemented bottom summary strip with per-level colored count pills and filtered/total indicator.
+   302→   302→- Added groupBySource toggle button ("▦ Grouped" / "☰ Flat") to switch between flat and grouped views.
+   303→   303→- Richer filter bar: each level button shows SparkBar + level label + count; active state uses level-colored border, background tint, and subtle glow.
+   304→   304→- Search input with Search icon prefix.
+   305→   305→- Stat cards now include lucide icons matching each level.
+   306→   306→- All scrollable areas use aeon-scroll class. aeon-grid-bg on terminal frame. Responsive grid (2 cols mobile → 5 cols sm).
+   307→   307→- Lint: 0 errors, 0 warnings. Dev server compiles cleanly.
+   308→   308→
+   309→   309→Stage Summary:
+   310→   310→- Artifact: `/home/z/my-project/src/components/aeon/logs-terminal.tsx` — fully rewritten single "use client" component (default + named export `LogsTerminal`).
+   311→   311→- All 7 requested improvements implemented: syntax-highlighted entries, color-coded severity badges, collapsible source groups, live tail indicator, animated empty state, sparkline filter bar, relative timestamps with tooltip.
+   312→   312→- No other files modified. Lint clean, compiles clean.
+   313→   313→- Preserves all existing functionality: level filter, search, export, sync, stat cards.
+   314→   314→
+   315→   315→---
+   316→   316→Task ID: STYLE-3
+   317→   317→Agent: full-stack-developer (Sensory polish)
+   318→   318→Task: Dramatically improved the SensoryPanel visual quality — replaced plain mic button with animated concentric rings + waveform, added ECG line and metric-specific icons for biometric injection with glow/flash feedback, upgraded camera feed to surveillance-style overlay, polished TTS with waveform bars and progress bar, and enhanced the sensory feed with slide-in animations and pulse on latest event.
+   319→   319→
+   320→   320→Work Log:
+   321→   321→- Read worklog.md, globals.css (HUD palette vars, aeon-scroll, animation keyframes including aeon-pulse, aeon-ring, aeon-blink, aeon-scanline), store.ts (SensoryEventView shape, refresh), aeon.ts (types), ui.tsx (StatusDot, timeAgo), and the existing sensory-panel.tsx.
+   322→   322→- Designed and implemented 7 visual improvements:
+   323→   323→  1. **Animated voice input rings**: Replaced plain mic button with `VoiceRings` component — 4 concentric SVG circles with framer-motion scaling + fading opacity animation radiating outward. Added `RecordingWaveform` component — SVG sine wave that animates in real-time via requestAnimationFrame while recording. Mic button pulses with glow shadow.
+   324→   324→  2. **Better biometric injection**: Added `BIO_META` taxonomy (heart_rate→Heart+ECG, sleep_hours→Moon, steps→Footprints, stress_index→Brain, posture→Activity). `EcgLine` component draws a self-tracing SVG path for heart_rate metric. AnimatePresence swaps metric-specific visualizations. "Inject & Evaluate" button has glow shadow, pulsing animation during injection, spinner + "Injecting…" state.
+   325→   325→  3. **Visual feedback after injection**: `bioFlash` state triggers a `motion.div` box-shadow animation — aeon-danger for high values (heart_rate>110), aeon-active for normal. Flash lasts 800ms. Toast includes "— ELEVATED" suffix for high readings.
+   326→   326→  4. **Camera feed improvement**: `CameraOverlay` component with: blinking REC indicator (animate-aeon-blink), live-updating timestamp, CAM_01·PORCH label, fake signal-strength meter (3-5 bars, randomizes every 3s), animated scanning line (framer-motion top:0%→100%), SVG corner brackets. All overlaid on the dark scanline background.
+   327→   327→  5. **Sensory feed improvement**: Each event has framer-motion slide-in animation (opacity:0→1, x:-12→0, height:0→auto). Channel icons are larger (h-6 w-6 container with h-3.5 w-3.5 icon, colored background chip). Most recent event (idx===0) gets aeon-core border + animate-aeon-pulse on its icon chip. Event count displayed in header.
+   328→   328→  6. **TTS section polish**: `TtsWaveform` component — 24 bouncing bars with framer-motion height animation. `TtsProgressBar` component — animated progress bar that estimates speech duration (~150 wpm). Three visual states: idle (Speak button), speaking (Stop + waveform + progress + "LIVE" badge + "synthesizing" indicator), completed (DONE badge + "✓ playback complete" text). AnimatePresence on waveform container.
+   329→   329→  7. **Overall**: Reduced gaps (gap-4→gap-3, padding tightened), `HudCorners` component adds SVG corner brackets to every card, wider left accent strips on stat tiles (3px), consistent aeon color palette throughout, aeon-scroll on feed, responsive grid preserved, no indigo/blue.
+   330→   330→- Added imports: Moon, Footprints, Brain, Signal, CircleDot from lucide-react; useCallback, useMemo from react.
+   331→   331→- Lint: 0 errors, 0 warnings. Dev server compiles cleanly (no runtime errors).
+   332→   332→
+   333→   333→Stage Summary:
+   334→   334→- Artifact: `/home/z/my-project/src/components/aeon/sensory-panel.tsx` — fully rewritten single "use client" component (default + named export `SensoryPanel`).
+   335→   335→- All 7 requested improvements implemented: animated voice rings + waveform, dramatic biometric injection with ECG + flash feedback, surveillance camera overlay, animated sensory feed, TTS waveform + progress bar, tighter HUD-styled layout with corner brackets.
+   336→   336→- No other files modified. Lint clean, compiles clean.
+   337→   337→- Preserves all existing functionality: ASR recording/transcription, TTS playback, biometric injection with trigger evaluation, vision motion injection, sensory feed display.
+   338→   338→
+   339→   339→---
+   340→   340→Task ID: REVIEW-2 (cron webDevReview)
+   341→   341→Agent: orchestrator (Z.ai Code)
+   342→   342→Task: Cron-triggered review — QA, VLM-based visual assessment, polish 3 weakest views, add System Dashboard feature.
+   343→   343→
+   344→   344→Work Log:
+   345→   345→- Reviewed worklog.md: A.E.O.N. had 9 views, was stable from REVIEW-1 round.
+   346→   346→- Pre-flight: stream service was down (restored it); home 200, lint clean.
+   347→   347→- agent-browser QA: all 9 views render with 0 errors.
+   348→   348→- Took screenshots of all 9 views → VLM (glm-4.6v) comparative ranking:
+   349→   349→  Worst→Best: Actions(5), Logs(9), Sensory(4), Agents(2), Triggers(6), Core(1),
+   350→   350→  Memory(3), IoT(7), Console(8).
+   351→   351→- Focused this round on the 3 weakest views + a new feature:
+   352→   352→
+   353→   353→Styling polish (VLM-directed):
+   354→   354→1. **Actions panel** — completely rewritten with:
+   355→   355→   - Gradient tier header cards (gradient bg + top accent bar + proportion bar + group-hover)
+   356→   356→   - Pulsing "awaiting" card when pending actions exist
+   357→   357→   - Summary stats row (executed/denied/advisory/success rate)
+   358→   358→   - Tier policy strip with gradient color swatches
+   359→   359→   - Active filter has tier-colored border + background + glow
+   360→   360→   - Action timeline with a vertical spine + status-colored timeline nodes
+   361→   361→   - Action rows with gradient icon backgrounds, status badges, arrow result blocks
+   362→   362→   - Approve/Deny buttons with glow hover effects
+   363→   363→   - Better empty state (icon + blinking cursor + hint text)
+   364→   364→2. **Logs terminal** — rewritten by subagent with:
+   365→   365→   - Syntax-highlighted entries per level (ERROR=pulsing glow, WARN=amber, INFO=emerald, DEBUG=muted)
+   366→   366→   - Color-coded severity badges (ERROR=rose+AlertTriangle+pulsing, WARN=amber+AlertCircle, INFO=emerald+CheckCircle, DEBUG=gray+Code2)
+   367→   367→   - Collapsible source groups (sorted by severity, top 3 auto-expand)
+   368→   368→   - Live tail indicator (pulsing dot + LIVE badge + "+N" counter)
+   369→   369→   - Animated blinking cursor empty state
+   370→   370→   - Richer filter bar with mini SparkBar charts per level
+   371→   371→   - Relative timestamps with absolute hover tooltips
+   372→   372→3. **Sensory panel** — rewritten by subagent with:
+   373→   373→   - Animated voice input rings (4 concentric SVG circles + sine waveform)
+   374→   374→   - Metric-specific biometric injection (heart→ECG line, sleep→Moon, steps→Footprints)
+   375→   375→   - Visual flash after injection (aeon-danger glow for elevated, aeon-active for normal)
+   376→   376→   - Surveillance-style camera overlay (REC indicator, scanning line, corner brackets, signal meter)
+   377→   377→   - Slide-in animations for sensory feed, pulse on latest event
+   378→   378→   - TTS waveform bars (24 animated bars) + progress bar + state indicators (LIVE/DONE)
+   379→   379→
+   380→   380→New feature:
+   381→   381→4. **System Dashboard widget** on Core view:
+   382→   382→   - Cycle success rate (SVG gauge ring + percentage + p95 latency)
+   383→   383→   - Avg latency (color-coded by threshold: green<3s, amber<6s, red>6s)
+   384→   384→   - Memory growth (count + cloud/local routing split)
+   385→   385→   - Agent utilization (busy/total + tasks count)
+   386→   386→   - Each card has a mini sparkline showing recent trend
+   387→   387→   - Bottom strip: executed/pending action counts + LOCAL↔CLOUD routing proportion bar
+   388→   388→   - File: src/components/aeon/system-dashboard.tsx
+   389→   389→
+   390→   390→Verification:
+   391→   391→- VLM quality ratings after polish: Core 9/10, Actions 8/10, Logs 9/10, Sensory 9/10
+   392→   392→  (all 3 weakest views jumped from bottom to 8-9/10)
+   393→   393→- Lint clean (0 errors), home 200, 0 runtime errors.
+   394→   394→- Mobile 375x812: no horizontal overflow, footer pushes naturally (bodyH 2168).
+   395→   395→- Stream service restored and healthy.
+   396→   396→
+   397→   397→Stage Summary:
+   398→   398→- A.E.O.N. now has visually polished Actions (gradient cards + timeline), Logs
+   399→   399→  (syntax highlighting + severity badges + collapsible groups), and Sensory
+   400→   400→  (animated voice rings + ECG line + camera overlay) views, plus a System
+   401→   401→  Dashboard with real-time gauges on the Core view.
+   402→   402→- All views rate 8-9/10 by VLM. Lint clean, 0 errors, responsive verified.
+   403→   403→- Unresolved / next-phase: agent-to-agent messaging, vector memory
+   404→   404→  visualization, real VLM image analysis, OAuth multi-user, mobile bottom-nav,
+   405→   405→  cycle history search/filter, console conversation export, dark/light theme
+   406→   406→  toggle, keyboard shortcuts.
+   407→   407→
+   408→   408→---
+   409→   409→Task ID: FEATURE-2
+   410→   410→Agent: full-stack-developer (mobile bottom-nav)
+   411→   411→Task: Added a native-app-style mobile bottom navigation bar to AeonShell so the app is genuinely usable on phones. Below `md` (768px) the left sidebar is hidden and a horizontally-scrollable bottom rail of 9 icon+label buttons takes over; desktop layout is unchanged.
+   412→   412→
+   413→   413→Work Log:
+   414→   414→- Read worklog.md (project status + conventions: aeon palette, aeon-scroll, framer-motion, lucide-react, NO indigo/blue) and re-read `src/components/aeon/aeon-shell.tsx` + `src/lib/store.ts` (View union, useAeon selectors) + the `aeon-scroll`/`--aeon-core`/`animate-aeon-pulse` definitions in globals.css.
+   415→   415→- Created `src/components/aeon/mobile-bottom-nav.tsx` exporting `MobileBottomNav`. It reads `view` + `setView` from `useAeon`, renders a `md:hidden` rail (`role=navigation`, `aria-label="Primary navigation"`) with `overflow-x-auto aeon-scroll` containing all 9 buttons in spec order: Core/Brain, Agents/Cpu, Memory/Activity, Sensory/Radar, Actions/ShieldCheck, Triggers/Zap, IoT/House, Console/MessageSquare, Logs/Terminal.
+   416→   416→  • Each button is 68px wide (`w-[4.25rem]`) with a h-14 column: lucide icon (18px) + mono 9px uppercase label.
+   417→   417→  • Active button: amber `var(--aeon-core)` text, `animate-aeon-pulse` on the icon, a `drop-shadow` glow via `color-mix`, a top accent line (`motion.span` with `layoutId="mobile-nav-active"` so the bar slides between buttons), and `aria-current="page"`.
+   418→   418→  • Inactive buttons: `text-muted-foreground` with `hover:text-foreground`.
+   419→   419→  • `paddingBottom: env(safe-area-inset-bottom)` inline style for iOS home-indicator safety.
+   420→   420→  • `useEffect` on `view` calls `scrollIntoView({ inline: "center", block: "nearest" })` so the active button is auto-centered when it changes (9 buttons don't all fit on a 375px phone).
+   421→   421→  • Rail is `sticky bottom-0 z-40` so it stays pinned to the bottom of the viewport during page scroll on long views (CoreView's cycle timeline makes the page scroll on mobile).
+   422→   422→- Integrated into `aeon-shell.tsx`:
+   423→   423→  • Imported `MobileBottomNav`.
+   424→   424→  • Sidebar `<nav>` className changed from `flex ... md:w-52` → `hidden ... md:flex md:w-52` so it's desktop-only (mobile uses the bottom-nav).
+   425→   425→  • Rendered `<MobileBottomNav />` as a flex-col sibling BETWEEN the body row and the `<footer>`. Because the body row is `flex-1`, it pushes both the bottom-nav and the `mt-auto` footer to the bottom of the `min-h-screen` flex-col root — bottom-nav sits directly above the footer, no overlap, no fixed positioning needed. `md:hidden` collapses it to 0 height on desktop so desktop layout is byte-identical to before.
+   426→   426→  • Header untouched (phase pills already `hidden md:flex`; connection indicator always visible; clock is `hidden sm:block` which is the pre-existing behavior — not broken by this change, so left as-is per "only change if broken").
+   427→   427→- Lint: `bun run lint` → 0 errors, 0 warnings. Dev.log shows clean Turbopack compilation.
+   428→   428→- agent-browser verification (375x812 mobile):
+   429→   429→  • Sidebar `offsetWidth=0` (hidden), `display` none on mobile ✓
+   430→   430→  • Bottom-nav visible, full-width (375px), height 57px, anchored at viewport bottom (top 755 / bottom 812) ✓
+   431→   431→  • All 9 buttons present with correct labels; `Core` has `data-active="true"` + `aria-current="page"` ✓
+   432→   432→  • Clicked `Logs` button → view switched (h1 became "LOGS"), active state moved to Logs, rail auto-scrolled ✓
+   433→   433→  • No horizontal page overflow (`scrollWidth === innerWidth === 375`) ✓
+   434→   434→  • Scrolled to bottom: bottom-nav at top 718/bottom 775, footer at top 775/bottom 812 — `gap=0`, no overlap, footer at viewport bottom ✓
+   435→   435→  • VLM (glm-4.6v) confirmed bottom-nav with active amber "CORE" button at the bottom of the screen.
+   436→   436→- agent-browser verification (1440x900 desktop):
+   437→   437→  • Sidebar visible, 208px wide (`md:w-52`), `display: flex` ✓
+   438→   438→  • Bottom-nav `display: none`, height 0 (hidden via `md:hidden`) ✓
+   439→   439→  • Footer visible at end of document ✓
+   440→   440→  • No regressions — desktop layout byte-identical to pre-feature.
+   441→   441→
+   442→   442→Stage Summary:
+   443→   443→- Files created: `src/components/aeon/mobile-bottom-nav.tsx` (MobileBottomNav — sticky bottom-0, md:hidden, horizontally-scrollable 9-button rail with active glow + top accent + safe-area inset + auto-scroll-to-active).
+   444→   444→- Files edited: `src/components/aeon/aeon-shell.tsx` (import MobileBottomNav; sidebar `hidden md:flex`; render `<MobileBottomNav />` between body and footer).
+   445→   445→- Mobile (<768px): sidebar hidden, sticky bottom-nav with all 9 views visible above the sticky footer; no overlap, no horizontal overflow, touch-friendly 56px-tall buttons, safe-area-respecting.
+   446→   446→- Desktop (≥768px): byte-identical to before — sidebar visible, no bottom-nav.
+   447→   447→- `bun run lint` clean. Dev server compiles cleanly.
+   448→   448→
+   449→   449→---
+   450→   450→Task ID: FEATURE-1
+   451→   451→Agent: full-stack-developer (agent messaging)
+   452→   452→Task: Implemented inter-agent messaging — agents can send each other messages (delegation, collaboration, status updates), with the operator seeing the full message bus in the Agents panel. Fulfills the "richer agent collaboration (agent-to-agent messaging)" next-phase item.
+   453→   453→
+   454→   454→Work Log:
+   455→   455→- Read worklog.md + prisma/schema.prisma + src/lib/store.ts + src/lib/aeon.ts + src/lib/logger.ts + src/components/aeon/agents-panel.tsx + src/components/aeon/ui.tsx + src/lib/db.ts + the cycles & chat API routes to lock in conventions (HUD palette, aeon-scroll, serialize helper, dynamic="force-dynamic", emitEvent/logger pattern, optimistic-update store pattern, AgentGlyph static-component wrapper).
+   456→   456→- Added `AgentMessage` Prisma model (id/fromAgent/toAgent/kind/subject/body/read/createdAt + @@index([toAgent]) + @@index([createdAt])) to `prisma/schema.prisma`. Ran `bun run db:push` (db synced) + `bun run db:generate` + touched `src/lib/db.ts` to invalidate the cached PrismaClient.
+   457→   457→- Created `src/app/api/aeon/agents/messages/route.ts` with:
+   458→   458→  • GET — lists recent messages (take=50 default, max 100), ordered desc. Optional `?agent=Name` filters to messages where that agent is sender OR recipient (including "broadcast").
+   459→   459→  • POST — validates {fromAgent, toAgent, kind, subject, body} and `kind ∈ {delegate,status,result,query,response}`, persists the message, emits a `logger.info` + `emitEvent` agent event, and — when kind is `delegate` or `query` — schedules a simulated auto-response from the target agent(s) after ~1.5s. For broadcast, every known agent (queried from db.agent) replies, staggered 700ms apart, none replying to itself.
+   460→   460→  • Auto-reply bodies come from a context-aware `AUTO_REPLY` map per agent (Coder→"Sandbox ready. Drafting implementation…", Researcher→"Crawling fresh sources…", IoT→"Acknowledged — applying device state change…", Financial→"Compiling figures…"), each acknowledging the original subject. Each auto-response is also logged + emitted as an agent event so the live stream picks it up.
+   461→   461→  • PATCH — marks messages as read by `{ids:string[]}` or `{agent:string}`.
+   462→   462→- Edited `src/lib/store.ts`:
+   463→   463→  • Exported `AgentMessageKind` and `AgentMessageView` types.
+   464→   464→  • Added `agentMessages`, `refreshAgentMessages`, `sendAgentMessage` to the store interface + implementation.
+   465→   465→  • `sendAgentMessage` does an optimistic insert at the head (read:true so it doesn't count as unread), POSTs, then schedules a refresh 1.8s later to catch the simulated response.
+   466→   466→  • `bootstrap()` now side-loads the message bus (non-blocking, alongside the existing refreshCycles).
+   467→   467→- Edited `src/components/aeon/agents-panel.tsx` to add a "Message Bus" section below the existing agent grid + dispatch directive card. Preserved the existing structure exactly (Stat header, agent grid with agentIcon/TierBadge/StatusDot, dispatch Textarea) and added:
+   468→   468→  • A bus header strip with Mail icon, "live · N" pill (Radio icon, emerald), an "unread" badge (Inbox icon, danger color), and a Refresh button.
+   469→   469→  • A responsive 2-column layout (`grid-cols-1 lg:grid-cols-[1.6fr_1fr]`): left = scrollable message thread (`aeon-scroll max-h-[460px]`), right = compose form.
+   470→   470→  • `MessageRow` component: left accent strip in the sender's color, from→to header with `AgentGlyph` icon chips (Radio icon for broadcast), kind badge colored per task spec (delegate=warn, status=active, result=core, query=think, response=active), an unread dot (pulsing rose) for `read===false`, and a `timeAgo` timestamp. Body + subject rendered in mono. Framer-motion entrance + exit animations via AnimatePresence.
+   471→   471→  • Compose form: From select (Orchestrator + 4 agents), To select (broadcast + 4 agents), Kind select (5 kinds with kind-colored labels), Subject input, Body textarea, Send button (disabled until subject+body present). When kind ∈ {delegate, query}, a hint shows "X will auto-reply (~1.5s)." or "Each agent will auto-reply (~1.5s)." for broadcast.
+   472→   472→  • Auto-refresh every 4s while the panel is mounted (`setInterval` + cleanup).
+   473→   473→  • New-response toast: tracks seen message IDs in a ref; on each refresh, any new `kind==="response"` fires a `sonner` toast with `fromAgent → toAgent · response` title and the body as description.
+   474→   474→  • Replaced the old `agentIcon()` call with a local `AGENT_ICONS_LOCAL` map + `agentIconSafe()` helper (property access, satisfies `react-hooks/static-components`).
+   475→   475→  • Empty state (`EmptyBus`) with Inbox icon + hint to use the compose form.
+   476→   476→- After schema changes, hit the expected stale-PrismaClient issue: GET /api/aeon/agents/messages returned 500 "Cannot read properties of undefined (reading 'findMany')". `bun run db:generate` + touching db.ts did NOT fix it (the global singleton in the running dev server was still stale). Killed the dev server (`pkill -f "next dev"`) and restarted it in the background — endpoint then returned 200.
+   477→   477→- Verified end-to-end:
+   478→   478→  * `curl -s http://127.0.0.1:3000/api/aeon/agents/messages` → 200 + array.
+   479→   479→  * POST a delegate from Orchestrator → IoT → after 1.5s, IoT auto-responds "Acknowledged — applying device state change for …".
+   480→   480→  * POST a query from Coder → Researcher → Researcher auto-responds "Query acknowledged — searching the web for …".
+   481→   481→  * POST a status to broadcast → no auto-reply (correct: only delegate/query trigger replies).
+   482→   482→  * POST a delegate to broadcast → all 4 agents (Coder, Researcher, IoT, Financial) reply staggered ~700ms apart, none replying to itself.
+   483→   483→  * `?agent=Coder` filter correctly returns both directions.
+   484→   484→- agent-browser verification: opened the app → AGENTS view → compose form (Orchestrator→Coder, delegate, "Plan new feature", "Draft the architecture…") → Send. Toast "Message sent: Orchestrator → Coder [DELEGATE]" appeared, then ~1.5s later a second toast "Coder → Orchestrator · response" with body "Sandbox ready. Drafting implementation…". Thread rendered both messages with from→to glyph chips, DELEGATE/RESPONSE badges, 24s/23s timestamps. Header shows "live · 14" + "14 unread". Auto-refresh polling visible in dev.log every ~4s.
+   485→   485→- Lint: `bun run lint` → 0 errors, 0 warnings. Dev server log: all 200/201 responses, no runtime errors.
+   486→   486→
+   487→   487→Stage Summary:
+   488→   488→- Artifacts: `prisma/schema.prisma` (added AgentMessage model), `src/app/api/aeon/agents/messages/route.ts` (new GET/POST/PATCH), `src/lib/store.ts` (added AgentMessageKind/AgentMessageView types + agentMessages state + refreshAgentMessages + sendAgentMessage + bootstrap side-load), `src/components/aeon/agents-panel.tsx` (added Message Bus section with thread + compose form, auto-refresh, unread indicators, sonner toasts on new responses).
+   489→   489→- Operators can now compose messages from any sender (Orchestrator or any agent) to any recipient (specific agent or broadcast) with kind delegate/status/result/query/response. Delegate + query messages auto-elicit a context-aware simulated response from the target agent(s) ~1.5s later, making the bus feel alive. The thread shows from→to arrows with agent-color glyphs, kind badges, unread dots, and relative timestamps; new responses trigger sonner toasts; the bus auto-refreshes every 4s while the panel is mounted.
+   490→   490→- No other files modified. Lint clean, 0 errors, 0 runtime errors. End-to-end verified via curl + agent-browser.
+   491→   491→
+   492→   492→---
+   493→   493→Task ID: REVIEW-3 (cron webDevReview)
+   494→   494→Agent: orchestrator (Z.ai Code)
+   495→   495→Task: Cron-triggered review — QA, build command palette + keyboard shortcuts, agent-to-agent messaging, mobile bottom-nav.
+   496→   496→
+   497→   497→Work Log:
+   498→   498→- Reviewed worklog.md: A.E.O.N. had 9 polished views (all 8-9/10 VLM-rated), stable.
+   499→   499→- Pre-flight: dev server + stream service up, home 200, lint clean.
+   500→   500→- agent-browser QA: all 9 views render with 0 errors. No bugs to fix → built new features.
+   501→   501→
+   502→   502→New features built this round:
+   503→   503→1. **Command Palette (⌘K)** — built by orchestrator:
+   504→   504→   - `src/components/aeon/command-palette.tsx`: fuzzy-search command console with 3 groups:
+   505→   505→     Navigate (9 views, each with number shortcut badge), Quick Dispatch (6 tier-tagged
+   506→   506→     directives that run a full orchestration cycle), System Actions (re-seed, sync, run
+   507→   507→     trigger evaluation, clear stream).
+   508→   508→   - Fuzzy subsequence matcher scoring; arrow-key navigation + Enter to select + Esc to close.
+   509→   509→   - Grouped results with colored group headers (navigate=active, dispatch=core, system=warn).
+   510→   510→   - Selected row has amber inset glow + corner-enter hint.
+   511→   511→   - Store additions: `commandPaletteOpen`, `setCommandPaletteOpen`.
+   512→   512→   - Header: ⌘K trigger button (desktop pill + mobile icon) added to status bar.
+   513→   513→2. **Global keyboard shortcuts** — wired in aeon-shell:
+   514→   514→   - ⌘K / Ctrl+K → open command palette (works even while typing).
+   515→   515→   - Number keys 1-9 → jump to corresponding view (only when not typing in an input).
+   516→   516→   - Smart input-detection (INPUT/TEXTAREA/contentEditable) prevents shortcuts while typing.
+   517→   517→3. **Agent-to-agent messaging** — built by subagent (FEATURE-1):
+   518→   518→   - Prisma `AgentMessage` model (fromAgent, toAgent, kind, subject, body, read) + pushed.
+   519→   519→   - `/api/aeon/agents/messages` GET/POST/PATCH; POST with kind delegate/query schedules a
+   520→   520→     simulated auto-response (~1.5s later, context-aware body per agent). Broadcast fans out.
+   521→   521→   - Store: `agentMessages`, `refreshAgentMessages`, `sendAgentMessage`; bootstrap side-loads.
+   522→   522→   - Agents panel: "Inter-Agent Message Bus" section — two-column thread + compose form,
+   523→   523→     agent-color accents, kind badges (delegate=warn, status=active, result=core, query=think,
+   524→   524→     response=active), unread dots, 4s auto-refresh, sonner toasts on new responses.
+   525→   525→4. **Mobile bottom-nav** — built by subagent (FEATURE-2):
+   526→   526→   - `src/components/aeon/mobile-bottom-nav.tsx`: sticky bottom rail (md:hidden), 9 horizontally-
+   527→   527→     scrollable icon buttons, active state with amber glow + sliding top accent (layoutId) +
+   528→   528→     animate-aeon-pulse, safe-area-inset padding, auto-scrollIntoView on view change.
+   529→   529→   - aeon-shell: sidebar nav now `hidden md:flex` (desktop-only); MobileBottomNav rendered
+   530→   530→     before the footer so the sticky footer stays last with zero overlap.
+   531→   531→
+   532→   532→Verification (agent-browser):
+   533→   533→- ⌘K opens palette → typed "memory" → filtered to "Go to Memory" → Enter navigated to Memory view.
+   534→   534→- Number keys: pressed 7 → IoT view; pressed 2 → Agents view. Both worked.
+   535→   535→- Agent messaging: filled compose (subject + body) → Send → delegate persisted → Coder auto-
+   536→   536→  replied with "response" kind ~1.5s later. Verified via API: both messages in DB.
+   537→   537→- Mobile 375x812: sidebar hidden, bottom-nav visible with all 9 buttons, no horizontal overflow,
+   538→   538→  footer pushes naturally (bodyH 1231). Desktop 1440x900: sidebar 208px, unchanged.
+   539→   539→- VLM rated command palette 8/10 ("Clear, functional, good contrast and organization").
+   540→   540→- Lint clean (0 errors), 0 runtime errors across all 9 views.
+   541→   541→
+   542→   542→Stage Summary:
+   543→   543→- A.E.O.N. now has a ⌘K command palette with fuzzy search + quick dispatch + system actions,
+   544→   544→  global keyboard shortcuts (⌘K palette, 1-9 view jump), an inter-agent message bus with
+   545→   545→  simulated auto-replies, and a native-app-style mobile bottom-nav.
+   546→   546→- All features verified end-to-end via agent-browser. Lint clean, 0 errors, responsive verified.
+   547→   547→- Unresolved / next-phase: vector memory visualization, real VLM image analysis on camera
+   548→   548→  frames, OAuth multi-user, cycle history search/filter, console conversation export,
+   549→   549→  dark/light theme toggle, notification center / activity inbox.
+   550→   550→
+   551→   551→---
+   552→   552→Task ID: FEATURE-3
+   553→   553→Agent: full-stack-developer (console export)
+   554→   554→Task: Added Markdown + JSON export for the LLM Console conversation thread — a new "Export Transcript" card in the ConsolePanel side panel with two HUD-styled buttons that generate and download `aeon-console-<timestamp>.md` / `.json` files via Blob + URL.createObjectURL + anchor-click (matching the existing logs-terminal export pattern).
+   555→   555→
+   556→   556→Work Log:
+   557→   557→- Read worklog.md to lock in conventions (HUD palette: amber core / emerald active / no indigo-blue, aeon-* CSS vars, sonner toast pattern, shadcn Card/Badge, lucide icons).
+   558→   558→- Read the existing `src/components/aeon/console-panel.tsx` (ConsolePanel + TurnBubble + RoutingLegend + ToggleChip + Stat helpers) to plan a non-invasive integration; verified the `chat: ChatTurnView[]` shape from `src/lib/store.ts` (id/role/content/routing/webResults/durationMs/createdAt) and `RoutingDecision` (route/complexity/model/thinking) from `src/lib/aeon.ts`.
+   559→   559→- Referenced the proven download pattern in `src/components/aeon/logs-terminal.tsx` (Blob → createObjectURL → anchor click → revoke) for consistency.
+   560→   560→- Imported `Download`, `FileText`, `FileJson` from lucide-react alongside the existing icon set.
+   561→   561→- Added two `ConsolePanel` member functions: `exportMarkdown()` builds the transcript header (`# A.E.O.N. Console Transcript`, `Exported: <ISO>`, `Turns: <N>`) then iterates the chat array — user turns emit `## 👤 You · <relative time> · [LOCAL/CLOUD · model · complexity]` followed by the raw message and (when present) a `**Web sources cited:**` footnote list of `[host_name](url) — name` entries; assistant turns emit `### 🤖 A.E.O.N. · <durationMs>ms` followed by the assistant's markdown content verbatim. Each turn block is separated by `---` rules. The output is wrapped in a `text/markdown` Blob and downloaded as `aeon-console-<timestamp>.md`. `exportJSON()` serializes the raw `chat` array via `JSON.stringify(..., 2)` into an `application/json` Blob and downloads as `aeon-console-<timestamp>.json`.
+   562→   562→- Both functions bail early when `chat.length === 0` and fire `toast.success("Exported N turns as Markdown/JSON")` on success (sonner is already imported in the file).
+   563→   563→- Added a new `ExportCard` component (rendered below `<RoutingLegend />` in the side panel) — a bordered HUD card with a `Download`-icon header ("export transcript") and two stacked buttons: Markdown (amber `var(--aeon-core)` accent, `FileText` icon, "formatted transcript (.md)" subtitle) and JSON (emerald `var(--aeon-active)` accent, `FileJson` icon, "raw turns array (.json)" subtitle). Buttons use mono uppercase labels and a `hover:shadow-[0_0_14px_-3px_var(--aeon-*)]` glow on hover matching the HUD aesthetic.
+   564→   564→- Disabled state: when `chat.length === 0`, both buttons are replaced with an italic muted "No conversation to export yet" hint so the empty-state is self-explanatory; the card itself stays mounted to preserve layout continuity.
+   565→   565→- Preserved all existing structure (ConsolePanel, TurnBubble, ToggleChip, RoutingLegend, Stat) untouched; only additive imports, two functions inside ConsolePanel, one new card in the side panel, and one new `ExportCard` component before `Stat`.
+   566→   566→- Verified: `bun run lint` → 0 errors, 0 warnings. Dev.log shows clean `✓ Compiled` after the edit and `/api/aeon/chat` still returning 200.
+   567→   567→
+   568→   568→Stage Summary:
+   569→   569→- Artifact: `src/components/aeon/console-panel.tsx` — single file, additive edits only, no other files touched.
+   570→   570→- Markdown export emits the exact spec'd format (header → `---` → per-turn `## 👤 You` / `### 🤖 A.E.O.N.` blocks with routing metadata, preserved markdown content, and web-search footnote lists), JSON export emits the raw `ChatTurnView[]`.
+   571→   571→- Both buttons are HUD-styled (amber=Markdown, emerald=JSON), have hover glow, are gated on `chat.length > 0`, and confirm with sonner toasts. Lint clean.
+   572→   572→
+   573→   573→---
+   574→   574→Task ID: FEATURE-4
+   575→   575→Agent: full-stack-developer (cycle search/filter)
+   576→   576→Task: Added a HUD-style search + filter bar to the CycleTimeline component so operators can search cycles by keyword and filter by route (local/cloud) and outcome (executed/awaiting-confirmation/advisory); the displayed strip is the intersection of all active filters.
+   577→   577→
+   578→   578→Work Log:
+   579→   579→- Read `worklog.md` (project status, color palette, conventions) and `src/components/aeon/cycle-timeline.tsx` (existing horizontal strip + `CycleDetail` drawer).
+   580→   580→- Confirmed `CycleHistoryView` shape from `src/lib/store.ts` (input/thought/perception/reflection text fields, `route` string, `outcome` string) and that `--ring` is already amber (on-palette) so shadcn `Input` focus stays in theme.
+   581→   581→- Added `useState` (query / routeFilter / outcomeFilter) and `useMemo` for the filtered list as the intersection of: case-insensitive substring match across `input+thought+perception+reflection` AND route equality AND outcome equality.
+   582→   582→- Introduced a compact `FilterBar` (bordered, `bg-background/30`) with a `Search`-prefixed `Input` (placeholder "Search cycles…", in-input clear X), a `ROUTE` chip group (All/Local/Cloud — active = `--aeon-core` amber glow), an `OUTCOME` chip group (All/Executed/Awaiting/Advisory — active colored emerald/orange/rose per the palette), a right-aligned mono result count "N of M cycles", and a conditional "Clear" button (X icon) shown when any filter is active.
+   583→   583→- Generic `ChipGroup<T>` helper renders toggle chips with `aria-pressed`, active glow via `color-mix`, and hover lift; reusable for both dimensions.
+   584→   584→- Empty-state split: kept "No cycles yet. Dispatch a directive to begin the timeline." only when `cycles.length === 0`; added a distinct "No cycles match your filters." state (with `SlidersHorizontal` glyph + Clear-filters button) when filters yield zero results but cycles exist.
+   585→   585→- Preserved all existing behavior: header (History icon + count + Sync), cycle cards (selection glow, complexity bar, metrics), and `CycleDetail` drawer are untouched aside from mapping over `filtered` instead of `cycles`.
+   586→   586→- Filter bar is responsive (chips + count wrap with `flex-wrap` on mobile) and only renders once at least one cycle exists.
+   587→   587→- Ran `bun run lint` → 0 errors. Checked `dev.log` → clean compiles, no runtime errors.
+   588→   588→
+   589→   589→Stage Summary:
+   590→   590→- Artifact: `src/components/aeon/cycle-timeline.tsx` — single file, additive (new filter state, `FilterBar` + `ChipGroup` components, refined empty-state branch); existing card markup and `CycleDetail` drawer preserved verbatim.
+   591→   591→- Filtering is the intersection of search + route + outcome via `useMemo`; route chips glow amber, outcome chips glow emerald/orange/rose; result count and Clear button appear live on the right.
+   592→   592→- Lint clean (0 errors); no indigo/blue introduced; mobile-first responsive wrapping; accessibility via `aria-label`/`aria-pressed` on the search input and chips.
+   593→   593→
+   594→   594→---
+   595→   595→Task ID: FIX-CSS (critical recovery)
+   596→   596→Agent: orchestrator (Z.ai Code)
+   597→   597→Task: Fix broken preview — CSS compilation error preventing the app from loading.
+   598→   598→
+   599→   599→Root Cause:
+   600→   600→- Tailwind v4.1.18 registers `aeon` as a color namespace when `--aeon-*` custom properties
+   601→   601→  exist in `:root` (or when `text-[var(--aeon-core)]` arbitrary-value classes are used).
+   602→   602→- When generating `shadow-lg`/`shadow-md` utilities, Tailwind v4 emits
+   603→   603→  `--tw-shadow: 0 0 14px -3px var(--tw-shadow-color, var(--aeon-*))` where `*` is the
+   604→   604→  "opaque" namespace placeholder.
+   605→   605→- Lightning CSS (Turbopack's CSS parser) cannot parse the literal `*` in `var(--aeon-*)`,
+   606→   606→  throwing `Unexpected token Delim('*')` → HTTP 500 on every page.
+   607→   607→
+   608→   608→Fix Applied:
+   609→   609→1. Renamed ALL `--aeon-*` CSS custom properties to `--a_*` (underscore prefix breaks the
+   610→   610→   Tailwind v4 namespace detection pattern `--<namespace>-<key>`).
+   611→   611→   - `:root` block in globals.css: `--aeon-core` → `--a_core`, etc. (8 variables)
+   612→   612→   - All 384 `var(--aeon-*)` references in .tsx/.ts files → `var(--a_*)`
+   613→   613→   - All `[var(--aeon-*)]` arbitrary-value className strings → `[oklch(...)]` values
+   614→   614→   - `src/lib/aeon.ts` cssVar fields → `--a_*`
+   615→   615→   - `src/app/api/aeon/seed/route.ts` agent colors → `var(--a_*)`
+   616→   616→2. Switched dev server from Turbopack to Webpack (`--webpack` flag in package.json dev
+   617→   617→   script) as a belt-and-suspenders fix — Webpack's CSS pipeline doesn't use Lightning CSS
+   618→   618→   and handles edge cases more gracefully.
+   619→   619→3. Restored `--color-aeon-*` entries in `@theme inline` (now mapped to `--a_*`).
+   620→   620→4. Restored the full globals.css with all HUD utilities, animations, and scrollbar styles.
+   621→   621→
+   622→   622→Verification:
+   623→   623→- HOME: 200, lint clean (0 errors), all 9 views render with 0 browser errors.
+   624→   624→- Mobile 375x812: no horizontal overflow, sticky footer pushes naturally.
+   625→   625→- Stream service running on :3003/:3004.
+   626→   626→
+   627→   627→Stage Summary:
+   628→   628→- A.E.O.N. is back online and fully functional. The preview now works.
+   629→   629→- The Turbopack/Lightning CSS issue is permanently resolved by the `--a_*` rename + Webpack switch.
+   630→   630→- All prior features (9 views, command palette, agent messaging, mobile bottom-nav,
+   631→   631→  notification center, cycle history, console export, cycle search/filter) are intact.
+   632→   632→

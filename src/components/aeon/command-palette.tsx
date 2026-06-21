@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CornerDownLeft, ArrowUp, ArrowDown, Brain, Cpu, Activity, Radar,
   ShieldCheck, Zap, House, MessageSquare, Terminal, Send, Database, RotateCw,
-  Radio, Trash2, CornerDownLeft as EnterIcon, Command, type LucideIcon,
+  Radio, Trash2, CornerDownLeft as EnterIcon, Command, Settings, type LucideIcon,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 import { LOOP_PHASES } from "@/lib/aeon";
@@ -40,6 +40,7 @@ const VIEW_ICONS: Record<View, LucideIcon> = {
   iot: House,
   console: MessageSquare,
   logs: Terminal,
+  settings: Settings,
 };
 
 const VIEW_LABELS: Record<View, string> = {
@@ -52,6 +53,7 @@ const VIEW_LABELS: Record<View, string> = {
   iot: "IoT",
   console: "Console",
   logs: "Logs",
+  settings: "Settings",
 };
 
 const QUICK_DISPATCH = [

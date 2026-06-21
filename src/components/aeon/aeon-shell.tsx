@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import {
   Brain, Cpu, Activity, Radar, ShieldCheck, Terminal, Zap, House,
-  Wifi, WifiOff, Radio, ChevronRight, MessageSquare, Search,
+  Wifi, WifiOff, Radio, ChevronRight, MessageSquare, Search, Settings,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 import { useAeonStream } from "@/hooks/use-aeon-stream";
@@ -28,6 +28,7 @@ import { ConsolePanel } from "@/components/aeon/console-panel";
 import { CommandPalette } from "@/components/aeon/command-palette";
 import { MobileBottomNav } from "@/components/aeon/mobile-bottom-nav";
 import { NotificationCenter } from "@/components/aeon/notification-center";
+import { SettingsPanel } from "@/components/aeon/settings-panel";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -39,6 +40,7 @@ const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] 
   { id: "iot", label: "IoT", icon: House, desc: "Smart home" },
   { id: "console", label: "Console", icon: MessageSquare, desc: "Direct LLM" },
   { id: "logs", label: "Logs", icon: Terminal, desc: "Observability" },
+  { id: "settings", label: "Settings", icon: Settings, desc: "Preferences" },
 ];
 
 export function AeonShell() {
@@ -235,6 +237,7 @@ export function AeonShell() {
                 {view === "iot" && <IoTPanel />}
                 {view === "console" && <ConsolePanel />}
                 {view === "logs" && <LogsTerminal />}
+                {view === "settings" && <SettingsPanel />}
               </div>
             </motion.div>
           </AnimatePresence>
