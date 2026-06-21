@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { CycleTimeline } from "@/components/aeon/cycle-timeline";
+import { SystemDashboard } from "@/components/aeon/system-dashboard";
 
 const SUGGESTIONS = [
   { label: "Dim the living room to 30% warm — it's evening", tier: 1 },
@@ -99,6 +100,9 @@ export function CoreView() {
           accent="var(--aeon-warn)"
         />
       </div>
+
+      {/* System dashboard — aggregate metrics */}
+      <SystemDashboard />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1.1fr_1fr]">
         {/* Core visualization */}
