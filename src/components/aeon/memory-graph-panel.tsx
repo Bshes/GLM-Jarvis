@@ -43,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MemoryTimeline } from "@/components/aeon/memory-timeline";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Kind taxonomy → color + icon. The 7 canonical kinds each get a distinct
@@ -1100,6 +1101,9 @@ export default function MemoryGraphPanel() {
           </div>
         </Card>
       </div>
+
+      {/* Memory Timeline — temporal view of memory creation */}
+      <MemoryTimeline />
     </div>
   );
 }

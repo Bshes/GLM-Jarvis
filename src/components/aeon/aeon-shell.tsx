@@ -29,6 +29,7 @@ import { CommandPalette } from "@/components/aeon/command-palette";
 import { MobileBottomNav } from "@/components/aeon/mobile-bottom-nav";
 import { NotificationCenter } from "@/components/aeon/notification-center";
 import { SettingsPanel } from "@/components/aeon/settings-panel";
+import { SystemHealth } from "@/components/aeon/system-health";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -145,6 +146,9 @@ export function AeonShell() {
               </span>
               {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[oklch(0.82_0.15_75)]" />}
             </div>
+
+            {/* system health indicator */}
+            <SystemHealth />
 
             {/* notification center */}
             <NotificationCenter />

@@ -705,3 +705,53 @@ Stage Summary:
 - Unresolved / next-phase: polish Logs view (rated 6/10 — ensure all severity colors render
   with sample data), vector memory visualization, real VLM image analysis, OAuth multi-user,
   dark/light theme toggle.
+
+---
+Task ID: REVIEW-6 (cron webDevReview)
+Agent: orchestrator (Z.ai Code)
+Task: Cron review — QA, fix DB colors, build Memory Timeline + System Health widget.
+
+Work Log:
+- Pre-flight: dev server + stream service up, home 200, lint clean.
+- agent-browser QA: all 10 views render with 0 errors. No bugs.
+- Ran orchestration cycle "Research latest autonomous AI agents" → cloud route, executed,
+  persisted to CycleHistory. Verified via API.
+- VLM assessment: Logs=8 (up from 6), Core=7, Memory=8. No visual bugs.
+
+Bug fix:
+1. **DB seed colors** — the DB still held pre-rename `var(--aeon-*)` agent colors from the
+   original seed (before the --a_* rename). Re-seeded via POST /api/aeon/seed → all 4 agents
+   now have correct `var(--a_*)` colors (Coder=var(--a_act), Researcher=var(--a_active),
+   IoT=var(--a_core), Financial=var(--a_danger)).
+
+New features built:
+2. **Memory Timeline visualization** — `src/components/aeon/memory-timeline.tsx`:
+   - Temporal view of memory creation, grouped by day. Each day is a column with memory "drops"
+     colored by kind (episodic=amber, semantic=emerald, procedural=orange). Drop opacity scales
+     with importance. Click a drop to expand a detail drawer (content, kind badge, source, tags,
+     importance bar).
+   - Kind distribution badges with counts + percentages.
+   - Trend stats footer (active days, avg memories/day, peak/day).
+   - API: GET /api/aeon/memory/timeline (days, total, span, kindCounts).
+   - Integrated into Memory Graph panel below the graph + side panel.
+   - VLM rated 8/10.
+3. **System Health widget** — `src/components/aeon/system-health.tsx`:
+   - Compact real-time indicator in the header (lg+ screens).
+   - Pulsing health dot (green=NOMINAL, orange=BUSY>20 events/min, rose=OFFLINE).
+   - Events/min counter (computed from last 60s of stream events).
+   - Session uptime timer (formats as s/m/h).
+   - Hidden on mobile (lg:flex) to preserve header space.
+
+Verification:
+- Home 200, timeline API 200 (7 memories, 1 day, procedural:5/episodic:2).
+- All 10 views render with 0 browser errors. Lint clean (0 errors).
+- Mobile 375x812: no horizontal overflow, sticky footer pushes naturally (bodyH 2313).
+- VLM: Memory 8/10 (timeline clear and useful, no visual bugs).
+
+Stage Summary:
+- A.E.O.N. now has a Memory Timeline (temporal visualization) and a System Health widget in
+  the header. DB colors fixed at the source.
+- All features verified. Lint clean, 0 errors, responsive verified.
+- Unresolved / next-phase: vector memory visualization in 3D, real VLM image analysis on
+  camera frames, OAuth multi-user, dark/light theme toggle, cycle history export, keyboard
+  shortcut help overlay.
