@@ -31,6 +31,7 @@ import { NotificationCenter } from "@/components/aeon/notification-center";
 import { SettingsPanel } from "@/components/aeon/settings-panel";
 import { SystemHealth } from "@/components/aeon/system-health";
 import { ShortcutHelp } from "@/components/aeon/shortcut-help";
+import { ThemeToggle } from "@/components/aeon/theme-toggle";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -151,6 +152,9 @@ export function AeonShell() {
               </span>
               {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[oklch(0.82_0.15_75)]" />}
             </div>
+
+            {/* theme toggle */}
+            <ThemeToggle />
 
             {/* system health indicator */}
             <SystemHealth />

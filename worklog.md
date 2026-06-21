@@ -800,3 +800,44 @@ Stage Summary:
 - All features verified. Lint clean, 0 errors, responsive verified.
 - Unresolved / next-phase: vector memory 3D visualization, real VLM image analysis, OAuth
   multi-user, dark/light theme toggle, cycle history export, IoT view polish (rated 7).
+
+---
+Task ID: REVIEW-8 (cron webDevReview)
+Agent: orchestrator (Z.ai Code)
+Task: Cron review — QA, build dark/light theme toggle.
+
+Work Log:
+- Pre-flight: dev server + stream service up, home 200, lint clean.
+- agent-browser QA: all 10 views render with 0 errors. No bugs.
+- VLM assessment from last round: all views 7-9/10, no visual bugs. System stable.
+
+New feature built:
+1. **Dark/light theme toggle** — the most-requested next-phase item:
+   - `src/components/aeon/theme-provider.tsx`: wraps next-themes (attribute="class",
+     defaultTheme="dark", enableSystem=false, disableTransitionOnChange).
+   - `src/components/aeon/theme-toggle.tsx`: Sun/Moon toggle button in the header,
+     mounted-state guard to avoid hydration mismatch (uses ref callback instead of
+     useEffect+setState to satisfy the react-hooks/set-state-in-effect lint rule).
+   - `src/app/layout.tsx`: removed hardcoded `className="dark"` from <html>, wrapped
+     children in <ThemeProvider>.
+   - `src/app/globals.css`: restructured :root to hold LIGHT-mode color values (warm
+     parchment surface — oklch(0.97) background, deeper semantic palette for contrast),
+     moved all dark-mode colors to `.dark` block. Both themes use the same `--a_*`
+     variable names so all components work in both modes without changes.
+   - Light mode: warm parchment background, deeper amber/emerald/orange/rose accents
+     for readability, same HUD layout.
+   - VLM rated light mode 7/10 ("polished, good contrast, no visual bugs").
+
+Verification:
+- Default theme is "dark" (confirmed html className="dark").
+- Clicked toggle → theme switched to "light" (confirmed html className="light").
+- Toggled back to dark → all 10 views render correctly.
+- Lint clean (0 errors). Mobile 375x812: no overflow, footer OK.
+- VLM: light mode 7/10, no visual bugs.
+
+Stage Summary:
+- A.E.O.N. now supports dark/light theme switching via a header toggle. The entire color
+  system is theme-aware (light values in :root, dark values in .dark).
+- All features verified. Lint clean, 0 errors, responsive verified.
+- Unresolved / next-phase: IoT view polish (energy usage viz), vector memory 3D viz,
+  real VLM image analysis, OAuth multi-user, cycle history export.
