@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import {
   Brain, Cpu, Activity, Radar, ShieldCheck, Terminal, Zap, House,
-  Wifi, WifiOff, Radio, ChevronRight,
+  Wifi, WifiOff, Radio, ChevronRight, MessageSquare,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 import { useAeonStream } from "@/hooks/use-aeon-stream";
@@ -24,6 +24,7 @@ import { ActionsPanel } from "@/components/aeon/actions-panel";
 import { LogsTerminal } from "@/components/aeon/logs-terminal";
 import TriggersPanel from "@/components/aeon/triggers-panel";
 import { IoTPanel } from "@/components/aeon/iot-panel";
+import { ConsolePanel } from "@/components/aeon/console-panel";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -33,6 +34,7 @@ const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] 
   { id: "actions", label: "Actions", icon: ShieldCheck, desc: "Tiered queue" },
   { id: "triggers", label: "Triggers", icon: Zap, desc: "Anticipatory" },
   { id: "iot", label: "IoT", icon: House, desc: "Smart home" },
+  { id: "console", label: "Console", icon: MessageSquare, desc: "Direct LLM" },
   { id: "logs", label: "Logs", icon: Terminal, desc: "Observability" },
 ];
 
@@ -180,6 +182,7 @@ export function AeonShell() {
                 {view === "actions" && <ActionsPanel />}
                 {view === "triggers" && <TriggersPanel />}
                 {view === "iot" && <IoTPanel />}
+                {view === "console" && <ConsolePanel />}
                 {view === "logs" && <LogsTerminal />}
               </div>
             </motion.div>
@@ -188,25 +191,26 @@ export function AeonShell() {
       </div>
 
       {/* ===== Sticky footer ===== */}
-      <footer className="mt-auto border-t border-border bg-background/85 backdrop-blur-md">
+      <footer className="mt-auto border-t border-border bg-background/95 backdrop-blur-md">
         <div className="flex h-9 items-center gap-3 px-3 md:px-5">
-          <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--aeon-active)]">
+          <span className="flex items-center gap-1.5 rounded-sm bg-[var(--aeon-active)]/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--aeon-active)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> stream
           </span>
-          <div className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted-foreground">
+          <div className="min-w-0 flex-1 truncate font-mono text-[11px] text-foreground/70">
             {latest ? (
               <span>
-                <span className="text-[var(--aeon-core)]">[{latest.type.toUpperCase()}]</span> {latest.message ?? JSON.stringify(latest.data ?? "")}
+                <span className="font-bold text-[var(--aeon-core)]">[{latest.type.toUpperCase()}]</span>{" "}
+                <span className="text-foreground/80">{latest.message ?? JSON.stringify(latest.data ?? "")}</span>
               </span>
             ) : (
-              <span className="text-muted-foreground/60">awaiting events…</span>
+              <span className="text-muted-foreground">awaiting events…</span>
             )}
           </div>
-          <span className="hidden font-mono text-[10px] text-muted-foreground sm:inline">
-            {stream.length} buffered
+          <span className="hidden items-center gap-1 font-mono text-[10px] text-foreground/60 sm:inline">
+            <span className="text-[var(--aeon-core)]">{stream.length}</span> buffered
           </span>
-          <span className="font-mono text-[10px] text-muted-foreground">·</span>
-          <span className="font-mono text-[10px] text-muted-foreground">A.E.O.N. CORE</span>
+          <span className="font-mono text-[10px] text-muted-foreground/60">·</span>
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-foreground/70">A.E.O.N. CORE</span>
         </div>
       </footer>
 

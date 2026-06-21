@@ -16,6 +16,7 @@ import type {
   SensoryEventView,
   LoopPhase,
   OrchestrationResult,
+  RoutingDecision,
 } from "@/lib/aeon";
 
 export type View =
@@ -26,7 +27,8 @@ export type View =
   | "actions"
   | "logs"
   | "triggers"
-  | "iot";
+  | "iot"
+  | "console";
 
 export interface StatusSnapshot {
   agents: AgentView[];
@@ -39,6 +41,35 @@ export interface StatusSnapshot {
   events: SensoryEventView[];
   pendingActions: number;
   ts: number;
+}
+
+export interface CycleHistoryView {
+  id: string;
+  cycleId: string;
+  input: string;
+  perception: string;
+  thought: string;
+  reflection: string;
+  routing: RoutingDecision | null;
+  route: string;
+  complexity: number;
+  model: string;
+  thinking: boolean;
+  durationMs: number;
+  actionCount: number;
+  memoriesCreated: number;
+  outcome: string;
+  createdAt: string;
+}
+
+export interface ChatTurnView {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  routing: RoutingDecision | null;
+  webResults: { url: string; name: string; snippet: string; host_name: string }[] | null;
+  durationMs: number | null;
+  createdAt: string;
 }
 
 const STREAM_CAP = 160;
@@ -90,6 +121,18 @@ interface AeonStore {
   openConfirm: (a: ActionView) => void;
   closeConfirm: () => void;
 
+  // Cycle history (persistent timeline).
+  cycles: CycleHistoryView[];
+  refreshCycles: () => Promise<void>;
+  selectedCycle: CycleHistoryView | null;
+  selectCycle: (c: CycleHistoryView | null) => void;
+
+  // Direct LLM console.
+  chat: ChatTurnView[];
+  chatLoading: boolean;
+  refreshChat: () => Promise<void>;
+  sendChat: (message: string, opts: { useHistory: boolean; useWebSearch: boolean }) => Promise<void>;
+
   dispatch: (input: string, context?: string) => Promise<OrchestrationResult | null>;
   refreshActions: () => Promise<void>;
   resolveAction: (id: string, decision: "approved" | "denied") => Promise<void>;
@@ -120,6 +163,8 @@ export const useAeon = create<AeonStore>((set, get) => ({
       memoryCount: data.memoryCount,
       pendingActions: data.pendingActions,
     });
+    // Side-load cycle history (non-blocking).
+    void get().refreshCycles();
   },
   refresh: async () => {
     const res = await fetch("/api/aeon/status");
@@ -251,6 +296,7 @@ export const useAeon = create<AeonStore>((set, get) => ({
       const result = (await res.json()) as OrchestrationResult;
       // Refresh derived data after a cycle.
       await get().refresh();
+      void get().refreshCycles();
       return result;
     } catch (e) {
       console.error("dispatch failed", e);
@@ -274,5 +320,76 @@ export const useAeon = create<AeonStore>((set, get) => ({
     });
     await get().refresh();
     get().closeConfirm();
+  },
+
+  // ─── Cycle history ───
+  cycles: [],
+  refreshCycles: async () => {
+    try {
+      const res = await fetch("/api/aeon/cycles?take=30");
+      const data = (await res.json()) as CycleHistoryView[];
+      set({ cycles: data });
+    } catch {
+      /* ignore */
+    }
+  },
+  selectedCycle: null,
+  selectCycle: (c) => set({ selectedCycle: c }),
+
+  // ─── Direct LLM console ───
+  chat: [],
+  chatLoading: false,
+  refreshChat: async () => {
+    try {
+      const res = await fetch("/api/aeon/chat");
+      const data = (await res.json()) as ChatTurnView[];
+      set({ chat: data });
+    } catch {
+      /* ignore */
+    }
+  },
+  sendChat: async (message, opts) => {
+    set({ chatLoading: true });
+    try {
+      const res = await fetch("/api/aeon/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message, useHistory: opts.useHistory, useWebSearch: opts.useWebSearch }),
+      });
+      const data = (await res.json()) as {
+        response: string;
+        routing: RoutingDecision;
+        durationMs: number;
+        webResults?: { url: string; name: string; snippet: string; host_name: string }[];
+      };
+      // Optimistically append both turns to the local chat.
+      set((s) => ({
+        chat: [
+          ...s.chat,
+          {
+            id: `tmp-${Date.now()}-u`,
+            role: "user" as const,
+            content: message,
+            routing: data.routing,
+            webResults: data.webResults ?? null,
+            durationMs: null,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: `tmp-${Date.now()}-a`,
+            role: "assistant" as const,
+            content: data.response,
+            routing: null,
+            webResults: null,
+            durationMs: data.durationMs,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      }));
+    } catch (e) {
+      console.error("chat failed", e);
+    } finally {
+      set({ chatLoading: false });
+    }
   },
 }));

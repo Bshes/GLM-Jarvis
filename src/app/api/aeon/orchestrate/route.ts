@@ -311,6 +311,32 @@ Rules:
   await logger.info("orchestrator", `Reflection: ${plan.reflection} (outcome=${outcome})`, "REFLECT");
   await emitEvent({ type: "status", phase: "REFLECT", message: `Cycle ${cycleId} complete — ${outcome}` });
 
+  const durationMs = Date.now() - started;
+
+  // Persist the completed cycle to history.
+  try {
+    await db.cycleHistory.create({
+      data: {
+        cycleId,
+        input: userInput,
+        perception: plan.perception,
+        thought: plan.thought,
+        reflection: plan.reflection,
+        routing: JSON.stringify(routing),
+        route: routing.route,
+        complexity: routing.complexity,
+        model: routing.model,
+        thinking: routing.thinking,
+        durationMs,
+        actionCount: createdActions.length,
+        memoriesCreated,
+        outcome,
+      },
+    });
+  } catch (e) {
+    await logger.warn("orchestrator", `Failed to persist cycle history: ${(e as Error).message}`);
+  }
+
   const result: OrchestrationResult = {
     cycleId,
     perception: plan.perception,
@@ -319,7 +345,7 @@ Rules:
     actions: createdActions,
     reflection: plan.reflection,
     memoriesCreated,
-    durationMs: Date.now() - started,
+    durationMs,
   };
 
   return NextResponse.json(result);

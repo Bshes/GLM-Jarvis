@@ -150,3 +150,39 @@ model Setting {
   key   String @unique
   value String
 }
+
+/// A completed orchestration cycle — persistent history for the timeline.
+model CycleHistory {
+  id              String   @id @default(cuid())
+  cycleId         String
+  input           String
+  perception      String
+  thought         String
+  reflection      String
+  routing         String // JSON RoutingDecision
+  route           String // local | cloud
+  complexity      Float
+  model           String
+  thinking        Boolean  @default(false)
+  durationMs      Int
+  actionCount     Int
+  memoriesCreated Int
+  outcome         String // executed | awaiting-confirmation | advisory
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([route])
+}
+
+/// A saved direct-LLM console thread (one row per turn).
+model ChatTurn {
+  id        String   @id @default(cuid())
+  role      String // user | assistant
+  content   String
+  routing   String? // JSON RoutingDecision (user turns only)
+  webResults String? // JSON search hits (if web_search used)
+  durationMs Int?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

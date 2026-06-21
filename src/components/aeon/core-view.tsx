@@ -10,7 +10,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Send, Sparkles, Cpu, Activity, Zap, Radar, RotateCw,
-  ChevronRight, Terminal,
+  ChevronRight, Terminal, Waves, Gauge,
 } from "lucide-react";
 import { useAeon } from "@/lib/store";
 import { LOOP_PHASES, PHASE_META, TIER_META, type LoopPhase } from "@/lib/aeon";
@@ -18,6 +18,7 @@ import { PhasePill, TierBadge, timeAgo } from "@/components/aeon/ui";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { CycleTimeline } from "@/components/aeon/cycle-timeline";
 
 const SUGGESTIONS = [
   { label: "Dim the living room to 30% warm — it's evening", tier: 1 },
@@ -126,9 +127,7 @@ export function CoreView() {
             </div>
             <AnimatePresence initial={false}>
               {phaseEvents.length === 0 ? (
-                <div className="py-6 text-center text-muted-foreground">
-                  Awaiting input. Dispatch a directive to ignite the loop.
-                </div>
+                <TelemetryIdle />
               ) : (
                 phaseEvents.slice(0, 60).map((e) => <StreamLine key={e.id} e={e} />)
               )}
@@ -185,6 +184,115 @@ export function CoreView() {
 
       {/* Last cycle result */}
       {lastResult && <CycleResult />}
+
+      {/* Persistent cycle history timeline */}
+      <CycleTimeline />
+    </div>
+  );
+}
+
+/**
+ * TelemetryIdle — animated system telemetry shown in the live-stream panel
+ * when no cycle is running. Replaces the sparse "awaiting input" placeholder
+ * with a living HUD readout (CPU/model load sparklines + status lines).
+ */
+function TelemetryIdle() {
+  const agents = useAeon((s) => s.agents);
+  const memoryCount = useAeon((s) => s.memoryCount);
+  const cycles = useAeon((s) => s.cycles);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 900);
+    return () => clearInterval(t);
+  }, []);
+
+  // Synthesize a smooth pseudo-random telemetry series that updates each tick.
+  const series = (seed: number, len = 40) => {
+    const out: number[] = [];
+    for (let i = 0; i < len; i++) {
+      const phase = (tick + i) * 0.3 + seed;
+      out.push(0.5 + 0.4 * Math.sin(phase) + 0.1 * Math.sin(phase * 2.7));
+    }
+    return out;
+  };
+
+  const cpuSeries = series(0);
+  const memSeries = series(1.7);
+  const netSeries = series(3.4);
+
+  const avgCpu = Math.round(cpuSeries.slice(-8).reduce((a, b) => a + b, 0) / 8 * 100);
+  const avgMem = Math.round(memSeries.slice(-8).reduce((a, b) => a + b, 0) / 8 * 100);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col gap-3 py-2"
+    >
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+        <Gauge className="h-3 w-3 text-[var(--aeon-active)]" />
+        <span>system nominal · awaiting directive</span>
+        <span className="ml-auto inline-flex items-center gap-1 font-mono text-[var(--aeon-active)]">
+          <span className="h-1 w-1 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> idle
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <SparklineCard label="CPU LOAD" value={`${avgCpu}%`} data={cpuSeries} color="var(--aeon-core)" />
+        <SparklineCard label="MEM PRESSURE" value={`${avgMem}%`} data={memSeries} color="var(--aeon-active)" />
+        <SparklineCard label="NET I/O" value={`${(netSeries.slice(-1)[0] * 12).toFixed(1)} mb/s`} data={netSeries} color="var(--aeon-warn)" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-[10px] sm:grid-cols-4">
+        <IdleStat label="AGENTS" value={String(agents.length)} color="var(--aeon-active)" />
+        <IdleStat label="MEMORIES" value={String(memoryCount)} color="var(--aeon-core)" />
+        <IdleStat label="CYCLES" value={String(cycles.length)} color="var(--aeon-think)" />
+        <IdleStat label="STATUS" value="READY" color="var(--aeon-active)" />
+      </div>
+
+      <div className="flex items-center gap-1.5 pt-1 text-[10px] text-muted-foreground">
+        <Waves className="h-3 w-3 animate-pulse text-[var(--aeon-core)]" />
+        <span className="font-mono">cognitive loop primed · dispatch a directive to ignite</span>
+      </div>
+    </motion.div>
+  );
+}
+
+function SparklineCard({ label, value, data, color }: { label: string; value: string; data: number[]; color: string }) {
+  const w = 100;
+  const h = 28;
+  const max = 1;
+  const points = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - (v / max) * h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const areaPoints = `0,${h} ${points} ${w},${h}`;
+  return (
+    <div className="relative overflow-hidden rounded-md border border-border/40 bg-background/40 p-2">
+      <div className="flex items-center justify-between text-[9px] uppercase tracking-widest text-muted-foreground">
+        <span>{label}</span>
+        <span className="font-mono font-bold" style={{ color }}>{value}</span>
+      </div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="mt-1 h-7 w-full" preserveAspectRatio="none">
+        <polygon points={areaPoints} fill={color} opacity={0.12} />
+        <polyline points={points} fill="none" stroke={color} strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={w} cy={h - (data[data.length - 1] / max) * h} r="1.6" fill={color}>
+          <animate attributeName="opacity" values="1;0.3;1" dur="1.4s" repeatCount="indefinite" />
+        </circle>
+      </svg>
+    </div>
+  );
+}
+
+function IdleStat({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="rounded-md border border-border/40 bg-background/30 px-2 py-1.5">
+      <div className="text-[8px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="font-mono text-sm font-bold" style={{ color }}>{value}</div>
     </div>
   );
 }

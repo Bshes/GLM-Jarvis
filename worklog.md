@@ -205,3 +205,80 @@ Stage Summary:
   messaging), persistent cycle history view, vector memory visualization, real
   vision/VLM image analysis on uploaded camera frames, OAuth-backed multi-user
   operator profiles, and a mobile bottom-nav variant.
+
+---
+Task ID: REVIEW-1 (cron webDevReview)
+Agent: orchestrator (Z.ai Code)
+Task: Cron-triggered review — QA via agent-browser, fix issues, improve styling, add features.
+
+Work Log:
+- Reviewed worklog.md: A.E.O.N. was complete and verified from prior session.
+- Pre-flight checks: dev server running, stream service healthy (44 events buffered),
+  home 200, lint clean.
+- agent-browser QA pass: opened app, cycled all 8 views — 0 console/runtime errors.
+- VLM assessment of Core view (glm-4.6v): identified empty space when idle, sparse
+  stream panel, static hexagon glow, low footer contrast.
+- Decision: system stable (no bugs) → focused this round on (a) styling polish and
+  (b) new features per the mandatory requirements.
+
+New features built:
+1. **Cycle History persistence + timeline** (new feature)
+   - Prisma model `CycleHistory` added + pushed (cycleId, input, perception, thought,
+     reflection, routing JSON, route, complexity, model, thinking, durationMs,
+     actionCount, memoriesCreated, outcome).
+   - `/api/aeon/orchestrate` now persists every completed cycle to history.
+   - `/api/aeon/cycles` GET route (list recent, ?take=N).
+   - `CycleTimeline` component: horizontal scrolling strip of cycle cards on the Core
+     view (color-coded by outcome, complexity bar, route badge, metrics); click a card
+     to expand a full PERCEIVE/THINK/ACT/REFLECT transcript drawer.
+   - Store: `cycles`, `refreshCycles`, `selectedCycle`, `selectCycle`; bootstrap + dispatch
+     now side-load/refresh cycles.
+2. **LLM Direct Console** (new view)
+   - `/api/aeon/chat` POST (message, useHistory, useWebSearch) + GET (history).
+   - Persists user + assistant turns to new `ChatTurn` Prisma model.
+   - Optional web_search tool: fetches fresh results via SDK, augments prompt, cites [n].
+   - Optional conversation history (multi-turn) from prior turns.
+   - `ConsolePanel` component: chat thread with user/assistant bubbles, markdown
+     rendering (react-markdown), routing badge + complexity bar + thinking indicator
+     on each user turn, web-search citation chips, suggestions sidebar, routing-policy
+     legend. Stats: turns / local routes / cloud routes / web searches.
+   - Added "console" to View type + NAV (MessageSquare icon) + shell view switch.
+
+Styling polish (per VLM findings):
+3. **Core view idle-state**: replaced sparse "awaiting input" with `TelemetryIdle` —
+   animated SVG sparklines (CPU load / MEM pressure / NET I/O) updating every 0.9s,
+   4-stat readout (agents/memories/cycles/status), "cognitive loop primed" indicator.
+4. **Footer contrast**: stream pill now has bg tint + semibold; event text bumped to
+   foreground/80; buffered count + A.E.O.N. CORE label brightened to foreground/70.
+5. **Cycle timeline cards**: accent strip, outcome color, complexity bar, hover glow.
+
+Verification (agent-browser + VLM):
+- Home 200, /api/aeon/cycles 200, /api/aeon/chat 200. Lint clean (0 errors).
+- Ran orchestration cycle "Set the office blinds to 60% open" → local route, executed,
+  2.9s → persisted to CycleHistory → appeared in timeline. Clicked card → detail drawer
+  expanded with full transcript.
+- Console: clicked suggestion "Explain how your PERCEIVE-THINK-ACT-REFLECT loop" → LLM
+  responded with structured markdown; routing badge showed LOCAL · llama-3.1-local.
+- Chat API direct: "What is 2+2?" → local, complexity 0.18, 321ms, "2 + 2 = 4".
+- VLM on improved Core: "idle state visually richer with telemetry sparklines; cycle
+  history timeline polished; no major visual issues."
+- VLM on Console: "polished chat thread, clear routing badge, proper markdown, no issues."
+- All 9 views render with 0 errors. Mobile 375x812: no horizontal overflow, footer
+  pushes down naturally (bodyH 3510), Console renders.
+
+Incident & resolution:
+- After adding the new Prisma models, the dev server's global PrismaClient singleton was
+  stale (cached pre-new-models) → /api/aeon/cycles + /api/aeon/chat returned 500
+  ("Cannot read properties of undefined (reading 'findMany')"). `bun run db:generate` +
+  touching db.ts did not invalidate the global. Killed the dev server to force a fresh
+  client load; the system supervisor did not auto-restart it, so restarted `bun run dev`
+  in the background to restore service. All endpoints then returned 200.
+
+Stage Summary:
+- A.E.O.N. now has 9 views (added Console), persistent cycle history with an interactive
+  timeline + transcript drawer, a direct-LLM console with routing transparency + web
+  search tool, animated telemetry in the Core idle-state, and improved footer contrast.
+- Lint clean, 0 runtime errors, agent-browser + VLM verified across desktop + mobile.
+- Unresolved / next-phase opportunities: agent-to-agent messaging, vector memory
+  visualization, real VLM image analysis on camera frames, OAuth multi-user, mobile
+  bottom-nav, cycle history filtering/search, console conversation export.
