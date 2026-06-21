@@ -30,6 +30,7 @@ import { MobileBottomNav } from "@/components/aeon/mobile-bottom-nav";
 import { NotificationCenter } from "@/components/aeon/notification-center";
 import { SettingsPanel } from "@/components/aeon/settings-panel";
 import { SystemHealth } from "@/components/aeon/system-health";
+import { ShortcutHelp } from "@/components/aeon/shortcut-help";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -63,7 +64,7 @@ export function AeonShell() {
   }, []);
 
   // Global keyboard shortcuts: ⌘K / Ctrl+K toggles the command palette;
-  // number keys 1-9 jump to views (when not typing in an input).
+  // number keys 1-9 + 0 jump to views (when not typing in an input).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
@@ -75,12 +76,16 @@ export function AeonShell() {
         return;
       }
       if (typing) return;
+      // 1-9 → views 0-8; 0 → view 9 (Settings, the 10th view)
       if (e.key >= "1" && e.key <= "9") {
         const idx = Number(e.key) - 1;
         if (idx < NAV.length) {
           e.preventDefault();
           setView(NAV[idx].id);
         }
+      } else if (e.key === "0" && NAV.length >= 10) {
+        e.preventDefault();
+        setView(NAV[9].id);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -295,6 +300,9 @@ export function AeonShell() {
 
       {/* ⌘K command palette */}
       <CommandPalette />
+
+      {/* ? shortcut help overlay */}
+      <ShortcutHelp />
     </div>
   );
 }

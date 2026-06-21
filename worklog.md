@@ -755,3 +755,48 @@ Stage Summary:
 - Unresolved / next-phase: vector memory visualization in 3D, real VLM image analysis on
   camera frames, OAuth multi-user, dark/light theme toggle, cycle history export, keyboard
   shortcut help overlay.
+
+---
+Task ID: REVIEW-7 (cron webDevReview)
+Agent: orchestrator (Z.ai Code)
+Task: Cron review — QA, polish Console view, add keyboard shortcut help overlay.
+
+Work Log:
+- Pre-flight: dev server + stream service up, home 200, lint clean.
+- agent-browser QA: all 10 views render with 0 errors. No bugs.
+- VLM comparative assessment (glm-4.6v): Core=8, Agents=7, Memory=8, Sensory=7, Actions=7,
+  Triggers=8, IoT=7, Console=6, Logs=8, Settings=7. No visual bugs. Weakest: Console(6).
+
+New features built:
+1. **Keyboard shortcut help overlay** (`src/components/aeon/shortcut-help.tsx`):
+   - Press `?` anytime (when not typing) to toggle a modal listing all shortcuts.
+   - 4 groups: Global (⌘K, ?, Esc), Navigation (1-9 + 0 for the 10 views), Command Palette
+     (↑↓↵), Core View (⌘↵).
+   - Styled with kbd elements, group colors, and a footer note.
+   - Store additions: `shortcutHelpOpen`, `setShortcutHelpOpen`.
+   - Wired into shell. Also extended the number-key shortcut to support `0` → Settings (10th view).
+   - VLM rated 8/10.
+
+Styling polish:
+2. **Console view empty state** (was rated 6/10, now 9/10):
+   - Replaced the sparse "Direct reasoning channel open" with a rich empty state:
+     animated concentric-ring icon (pulsing border), bold "DIRECT REASONING CHANNEL" title,
+     routing info chips (LOCAL→CLOUD with icons + descriptions), and 3 clickable example
+     prompts with hover effects.
+   - Visual hierarchy: large icon → title → routing chips → example prompts.
+   - VLM rated 9/10 (up from 6/10).
+
+Verification:
+- `?` opens shortcut help overlay (confirmed "KEYBOARD SHORTCUTS" heading).
+- `0` navigates to Settings (confirmed h1=SETTINGS).
+- `1-9` navigate to views 1-9 (existing, still works).
+- All 10 views render with 0 browser errors. Lint clean (0 errors).
+- Mobile 375x812: no horizontal overflow, sticky footer pushes naturally (bodyH 1749).
+- VLM: Console 9/10 (up from 6), Shortcuts 8/10, no visual bugs.
+
+Stage Summary:
+- A.E.O.N. now has a keyboard shortcut help overlay (? key) and a dramatically improved
+  Console empty state. Number-key navigation extended to support `0` for Settings.
+- All features verified. Lint clean, 0 errors, responsive verified.
+- Unresolved / next-phase: vector memory 3D visualization, real VLM image analysis, OAuth
+  multi-user, dark/light theme toggle, cycle history export, IoT view polish (rated 7).

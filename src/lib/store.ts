@@ -140,6 +140,10 @@ interface AeonStore {
   commandPaletteOpen: boolean;
   setCommandPaletteOpen: (b: boolean) => void;
 
+  // Shortcut help overlay (?).
+  shortcutHelpOpen: boolean;
+  setShortcutHelpOpen: (b: boolean) => void;
+
   // Cycle history (persistent timeline).
   cycles: CycleHistoryView[];
   refreshCycles: () => Promise<void>;
@@ -319,6 +323,9 @@ export const useAeon = create<AeonStore>((set, get) => ({
 
   commandPaletteOpen: false,
   setCommandPaletteOpen: (b) => set({ commandPaletteOpen: b }),
+
+  shortcutHelpOpen: false,
+  setShortcutHelpOpen: (b) => set({ shortcutHelpOpen: b }),
 
   dispatch: async (input, context) => {
     set({ orchestrating: true, phase: "PERCEIVE" });

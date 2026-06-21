@@ -146,13 +146,47 @@ export function ConsolePanel() {
 
           <div ref={scrollRef} className="aeon-scroll min-h-0 flex-1 overflow-y-auto p-3">
             {chat.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center gap-3 py-12 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[oklch(0.82_0.15_75)]/30 bg-[oklch(0.82_0.15_75)]/5">
-                  <Sparkles className="h-5 w-5 text-[oklch(0.82_0.15_75)]" />
+              <div className="flex h-full flex-col items-center justify-center gap-4 py-8 text-center">
+                {/* Animated icon */}
+                <div className="relative flex h-16 w-16 items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border border-[oklch(0.82_0.15_75)]/20 animate-aeon-pulse" />
+                  <div className="absolute inset-2 rounded-full border border-[oklch(0.82_0.15_75)]/30" />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[oklch(0.82_0.15_75)]/40 bg-[oklch(0.82_0.15_75)]/10">
+                    <Sparkles className="h-5 w-5 text-[oklch(0.82_0.15_75)]" />
+                  </div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">Direct reasoning channel open</p>
+                  <p className="font-mono text-sm font-bold text-foreground">DIRECT REASONING CHANNEL</p>
                   <p className="mt-1 text-xs text-muted-foreground">Query the routed LLM directly — no action dispatch, just answers.</p>
+                </div>
+                {/* Routing info chips */}
+                <div className="flex flex-wrap items-center justify-center gap-1.5">
+                  <div className="inline-flex items-center gap-1 rounded-sm border border-[oklch(0.74_0.16_158)]/30 bg-[oklch(0.74_0.16_158)]/8 px-2 py-1 text-[10px]">
+                    <Cpu className="h-2.5 w-2.5 text-[oklch(0.74_0.16_158)]" />
+                    <span className="font-mono font-bold text-[oklch(0.74_0.16_158)]">LOCAL</span>
+                    <span className="text-muted-foreground">simple tasks</span>
+                  </div>
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  <div className="inline-flex items-center gap-1 rounded-sm border border-[oklch(0.82_0.15_75)]/30 bg-[oklch(0.82_0.15_75)]/8 px-2 py-1 text-[10px]">
+                    <Brain className="h-2.5 w-2.5 text-[oklch(0.82_0.15_75)]" />
+                    <span className="font-mono font-bold text-[oklch(0.82_0.15_75)]">CLOUD</span>
+                    <span className="text-muted-foreground">complex tasks</span>
+                  </div>
+                </div>
+                {/* Example prompts */}
+                <div className="mt-2 w-full max-w-md space-y-1.5">
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">try asking</p>
+                  {SUGGESTIONS.slice(0, 3).map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => void send(s)}
+                      disabled={chatLoading}
+                      className="group flex w-full items-center gap-2 rounded-md border border-border/40 bg-background/30 px-2.5 py-2 text-left text-xs text-muted-foreground transition hover:border-[oklch(0.82_0.15_75)]/40 hover:text-foreground disabled:opacity-40"
+                    >
+                      <ChevronRight className="h-3 w-3 shrink-0 text-[oklch(0.82_0.15_75)] opacity-0 transition group-hover:opacity-100" />
+                      <span className="flex-1">{s}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             ) : (
