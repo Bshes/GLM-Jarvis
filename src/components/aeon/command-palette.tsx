@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CornerDownLeft, ArrowUp, ArrowDown, Brain, Cpu, Activity, Radar,
   ShieldCheck, Zap, House, MessageSquare, Terminal, Send, Database, RotateCw,
-  Radio, Trash2, CornerDownLeft as EnterIcon, Command, Settings, type LucideIcon,
+  Radio, Trash2, CornerDownLeft as EnterIcon, Command, Settings, Sparkles, type LucideIcon,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 import { LOOP_PHASES } from "@/lib/aeon";
@@ -39,6 +39,7 @@ const VIEW_ICONS: Record<View, LucideIcon> = {
   triggers: Zap,
   iot: House,
   console: MessageSquare,
+  enhance: Sparkles,
   logs: Terminal,
   settings: Settings,
 };
@@ -52,6 +53,7 @@ const VIEW_LABELS: Record<View, string> = {
   triggers: "Triggers",
   iot: "IoT",
   console: "Console",
+  enhance: "Enhance",
   logs: "Logs",
   settings: "Settings",
 };

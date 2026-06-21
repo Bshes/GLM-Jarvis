@@ -28,6 +28,7 @@ import {
   House,
   MessageSquare,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 
@@ -40,6 +41,7 @@ const NAV: { id: View; label: string; icon: React.ElementType }[] = [
   { id: "triggers", label: "Triggers", icon: Zap },
   { id: "iot", label: "IoT", icon: House },
   { id: "console", label: "Console", icon: MessageSquare },
+  { id: "enhance", label: "Enhance", icon: Sparkles },
   { id: "logs", label: "Logs", icon: Terminal },
   { id: "settings", label: "Settings", icon: Settings },
 ];

@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import {
   Brain, Cpu, Activity, Radar, ShieldCheck, Terminal, Zap, House,
-  Wifi, WifiOff, Radio, ChevronRight, MessageSquare, Search, Settings,
+  Wifi, WifiOff, Radio, ChevronRight, MessageSquare, Search, Settings, Sparkles,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 import { useAeonStream } from "@/hooks/use-aeon-stream";
@@ -32,6 +32,7 @@ import { SettingsPanel } from "@/components/aeon/settings-panel";
 import { SystemHealth } from "@/components/aeon/system-health";
 import { ShortcutHelp } from "@/components/aeon/shortcut-help";
 import { ThemeToggle } from "@/components/aeon/theme-toggle";
+import { EnhancedConsole } from "@/components/aeon/enhanced-console";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -42,6 +43,7 @@ const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] 
   { id: "triggers", label: "Triggers", icon: Zap, desc: "Anticipatory" },
   { id: "iot", label: "IoT", icon: House, desc: "Smart home" },
   { id: "console", label: "Console", icon: MessageSquare, desc: "Direct LLM" },
+  { id: "enhance", label: "Enhance", icon: Sparkles, desc: "Cognitive pipeline" },
   { id: "logs", label: "Logs", icon: Terminal, desc: "Observability" },
   { id: "settings", label: "Settings", icon: Settings, desc: "Preferences" },
 ];
@@ -249,6 +251,7 @@ export function AeonShell() {
                 {view === "triggers" && <TriggersPanel />}
                 {view === "iot" && <IoTPanel />}
                 {view === "console" && <ConsolePanel />}
+                {view === "enhance" && <EnhancedConsole />}
                 {view === "logs" && <LogsTerminal />}
                 {view === "settings" && <SettingsPanel />}
               </div>
