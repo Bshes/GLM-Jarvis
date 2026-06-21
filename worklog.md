@@ -547,3 +547,46 @@ Stage Summary:
 - Unresolved / next-phase: vector memory visualization, real VLM image analysis on camera
   frames, OAuth multi-user, cycle history search/filter, console conversation export,
   dark/light theme toggle, notification center / activity inbox.
+
+---
+Task ID: FEATURE-3
+Agent: full-stack-developer (console export)
+Task: Added Markdown + JSON export for the LLM Console conversation thread — a new "Export Transcript" card in the ConsolePanel side panel with two HUD-styled buttons that generate and download `aeon-console-<timestamp>.md` / `.json` files via Blob + URL.createObjectURL + anchor-click (matching the existing logs-terminal export pattern).
+
+Work Log:
+- Read worklog.md to lock in conventions (HUD palette: amber core / emerald active / no indigo-blue, aeon-* CSS vars, sonner toast pattern, shadcn Card/Badge, lucide icons).
+- Read the existing `src/components/aeon/console-panel.tsx` (ConsolePanel + TurnBubble + RoutingLegend + ToggleChip + Stat helpers) to plan a non-invasive integration; verified the `chat: ChatTurnView[]` shape from `src/lib/store.ts` (id/role/content/routing/webResults/durationMs/createdAt) and `RoutingDecision` (route/complexity/model/thinking) from `src/lib/aeon.ts`.
+- Referenced the proven download pattern in `src/components/aeon/logs-terminal.tsx` (Blob → createObjectURL → anchor click → revoke) for consistency.
+- Imported `Download`, `FileText`, `FileJson` from lucide-react alongside the existing icon set.
+- Added two `ConsolePanel` member functions: `exportMarkdown()` builds the transcript header (`# A.E.O.N. Console Transcript`, `Exported: <ISO>`, `Turns: <N>`) then iterates the chat array — user turns emit `## 👤 You · <relative time> · [LOCAL/CLOUD · model · complexity]` followed by the raw message and (when present) a `**Web sources cited:**` footnote list of `[host_name](url) — name` entries; assistant turns emit `### 🤖 A.E.O.N. · <durationMs>ms` followed by the assistant's markdown content verbatim. Each turn block is separated by `---` rules. The output is wrapped in a `text/markdown` Blob and downloaded as `aeon-console-<timestamp>.md`. `exportJSON()` serializes the raw `chat` array via `JSON.stringify(..., 2)` into an `application/json` Blob and downloads as `aeon-console-<timestamp>.json`.
+- Both functions bail early when `chat.length === 0` and fire `toast.success("Exported N turns as Markdown/JSON")` on success (sonner is already imported in the file).
+- Added a new `ExportCard` component (rendered below `<RoutingLegend />` in the side panel) — a bordered HUD card with a `Download`-icon header ("export transcript") and two stacked buttons: Markdown (amber `var(--aeon-core)` accent, `FileText` icon, "formatted transcript (.md)" subtitle) and JSON (emerald `var(--aeon-active)` accent, `FileJson` icon, "raw turns array (.json)" subtitle). Buttons use mono uppercase labels and a `hover:shadow-[0_0_14px_-3px_var(--aeon-*)]` glow on hover matching the HUD aesthetic.
+- Disabled state: when `chat.length === 0`, both buttons are replaced with an italic muted "No conversation to export yet" hint so the empty-state is self-explanatory; the card itself stays mounted to preserve layout continuity.
+- Preserved all existing structure (ConsolePanel, TurnBubble, ToggleChip, RoutingLegend, Stat) untouched; only additive imports, two functions inside ConsolePanel, one new card in the side panel, and one new `ExportCard` component before `Stat`.
+- Verified: `bun run lint` → 0 errors, 0 warnings. Dev.log shows clean `✓ Compiled` after the edit and `/api/aeon/chat` still returning 200.
+
+Stage Summary:
+- Artifact: `src/components/aeon/console-panel.tsx` — single file, additive edits only, no other files touched.
+- Markdown export emits the exact spec'd format (header → `---` → per-turn `## 👤 You` / `### 🤖 A.E.O.N.` blocks with routing metadata, preserved markdown content, and web-search footnote lists), JSON export emits the raw `ChatTurnView[]`.
+- Both buttons are HUD-styled (amber=Markdown, emerald=JSON), have hover glow, are gated on `chat.length > 0`, and confirm with sonner toasts. Lint clean.
+
+---
+Task ID: FEATURE-4
+Agent: full-stack-developer (cycle search/filter)
+Task: Added a HUD-style search + filter bar to the CycleTimeline component so operators can search cycles by keyword and filter by route (local/cloud) and outcome (executed/awaiting-confirmation/advisory); the displayed strip is the intersection of all active filters.
+
+Work Log:
+- Read `worklog.md` (project status, color palette, conventions) and `src/components/aeon/cycle-timeline.tsx` (existing horizontal strip + `CycleDetail` drawer).
+- Confirmed `CycleHistoryView` shape from `src/lib/store.ts` (input/thought/perception/reflection text fields, `route` string, `outcome` string) and that `--ring` is already amber (on-palette) so shadcn `Input` focus stays in theme.
+- Added `useState` (query / routeFilter / outcomeFilter) and `useMemo` for the filtered list as the intersection of: case-insensitive substring match across `input+thought+perception+reflection` AND route equality AND outcome equality.
+- Introduced a compact `FilterBar` (bordered, `bg-background/30`) with a `Search`-prefixed `Input` (placeholder "Search cycles…", in-input clear X), a `ROUTE` chip group (All/Local/Cloud — active = `--aeon-core` amber glow), an `OUTCOME` chip group (All/Executed/Awaiting/Advisory — active colored emerald/orange/rose per the palette), a right-aligned mono result count "N of M cycles", and a conditional "Clear" button (X icon) shown when any filter is active.
+- Generic `ChipGroup<T>` helper renders toggle chips with `aria-pressed`, active glow via `color-mix`, and hover lift; reusable for both dimensions.
+- Empty-state split: kept "No cycles yet. Dispatch a directive to begin the timeline." only when `cycles.length === 0`; added a distinct "No cycles match your filters." state (with `SlidersHorizontal` glyph + Clear-filters button) when filters yield zero results but cycles exist.
+- Preserved all existing behavior: header (History icon + count + Sync), cycle cards (selection glow, complexity bar, metrics), and `CycleDetail` drawer are untouched aside from mapping over `filtered` instead of `cycles`.
+- Filter bar is responsive (chips + count wrap with `flex-wrap` on mobile) and only renders once at least one cycle exists.
+- Ran `bun run lint` → 0 errors. Checked `dev.log` → clean compiles, no runtime errors.
+
+Stage Summary:
+- Artifact: `src/components/aeon/cycle-timeline.tsx` — single file, additive (new filter state, `FilterBar` + `ChipGroup` components, refined empty-state branch); existing card markup and `CycleDetail` drawer preserved verbatim.
+- Filtering is the intersection of search + route + outcome via `useMemo`; route chips glow amber, outcome chips glow emerald/orange/rose; result count and Clear button appear live on the right.
+- Lint clean (0 errors); no indigo/blue introduced; mobile-first responsive wrapping; accessibility via `aria-label`/`aria-pressed` on the search input and chips.

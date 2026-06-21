@@ -3,15 +3,25 @@
  * CycleTimeline — persistent history of completed orchestration cycles.
  * Rendered as a horizontal scrolling strip on the Core view; clicking a cycle
  * opens a detail drawer with the full PERCEIVE/THINK/ACT/REFLECT transcript.
+ *
+ * Includes a HUD-style filter bar above the strip: a keyword search across the
+ * input/thought/perception/reflection fields plus route chips (All/Local/Cloud)
+ * and outcome chips (All/Executed/Awaiting/Advisory). The displayed set is the
+ * intersection of all active filters (useMemo). When filters yield zero results
+ * a dedicated empty-state replaces the strip; the "No cycles yet" message only
+ * shows when there are genuinely zero cycles total.
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { History, X, Cpu, Clock, Activity, Brain, Zap, ChevronRight } from "lucide-react";
+import {
+  History, X, Cpu, Clock, Activity, Brain, Zap, ChevronRight, Search, SlidersHorizontal,
+} from "lucide-react";
 import { useAeon, type CycleHistoryView } from "@/lib/store";
 import { timeAgo } from "@/components/aeon/ui";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const OUTCOME_COLOR: Record<string, string> = {
   executed: "var(--aeon-active)",
@@ -19,15 +29,59 @@ const OUTCOME_COLOR: Record<string, string> = {
   advisory: "var(--aeon-danger)",
 };
 
+type RouteFilter = "all" | "local" | "cloud";
+type OutcomeFilter = "all" | "executed" | "awaiting-confirmation" | "advisory";
+
+const ROUTE_CHIPS: { value: RouteFilter; label: string; color: string }[] = [
+  { value: "all", label: "All", color: "var(--aeon-core)" },
+  { value: "local", label: "Local", color: "var(--aeon-core)" },
+  { value: "cloud", label: "Cloud", color: "var(--aeon-core)" },
+];
+
+const OUTCOME_CHIPS: { value: OutcomeFilter; label: string; color: string }[] = [
+  { value: "all", label: "All", color: "var(--aeon-core)" },
+  { value: "executed", label: "Executed", color: "var(--aeon-active)" },
+  { value: "awaiting-confirmation", label: "Awaiting", color: "var(--aeon-warn)" },
+  { value: "advisory", label: "Advisory", color: "var(--aeon-danger)" },
+];
+
 export function CycleTimeline() {
   const cycles = useAeon((s) => s.cycles);
   const refreshCycles = useAeon((s) => s.refreshCycles);
   const selected = useAeon((s) => s.selectedCycle);
   const selectCycle = useAeon((s) => s.selectCycle);
 
+  // Filter state — keyword search + route + outcome dimensions.
+  const [query, setQuery] = useState("");
+  const [routeFilter, setRouteFilter] = useState<RouteFilter>("all");
+  const [outcomeFilter, setOutcomeFilter] = useState<OutcomeFilter>("all");
+
   useEffect(() => {
     void refreshCycles();
   }, [refreshCycles]);
+
+  // Intersection of: search match AND route filter AND outcome filter.
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return cycles.filter((c) => {
+      if (routeFilter !== "all" && c.route !== routeFilter) return false;
+      if (outcomeFilter !== "all" && c.outcome !== outcomeFilter) return false;
+      if (q) {
+        const haystack = `${c.input} ${c.thought} ${c.perception} ${c.reflection}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [cycles, query, routeFilter, outcomeFilter]);
+
+  const hasFilters =
+    query.trim() !== "" || routeFilter !== "all" || outcomeFilter !== "all";
+
+  const clearFilters = () => {
+    setQuery("");
+    setRouteFilter("all");
+    setOutcomeFilter("all");
+  };
 
   return (
     <div className="rounded-lg border border-border bg-card/40 p-3">
@@ -40,14 +94,38 @@ export function CycleTimeline() {
         </Button>
       </div>
 
+      {/* Filter bar — only renders once there is at least one cycle to filter. */}
+      {cycles.length > 0 && (
+        <FilterBar
+          query={query}
+          onQuery={setQuery}
+          route={routeFilter}
+          onRoute={setRouteFilter}
+          outcome={outcomeFilter}
+          onOutcome={setOutcomeFilter}
+          resultCount={filtered.length}
+          total={cycles.length}
+          hasFilters={hasFilters}
+          onClear={clearFilters}
+        />
+      )}
+
       {cycles.length === 0 ? (
         <div className="py-6 text-center text-xs text-muted-foreground">
           No cycles yet. Dispatch a directive to begin the timeline.
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-6 text-center">
+          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground">No cycles match your filters.</p>
+          <Button size="sm" variant="outline" onClick={clearFilters} className="h-7 px-2 text-[10px]">
+            <X className="mr-1 h-3 w-3" /> Clear filters
+          </Button>
+        </div>
       ) : (
         <ScrollArea className="aeon-scroll w-full pb-1">
           <div className="flex gap-2 px-0.5">
-            {cycles.map((c) => {
+            {filtered.map((c) => {
               const active = selected?.id === c.id;
               const color = OUTCOME_COLOR[c.outcome] ?? "var(--muted-foreground)";
               return (
@@ -99,6 +177,128 @@ export function CycleTimeline() {
       )}
 
       <CycleDetail />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Filter bar                                                         */
+/* ------------------------------------------------------------------ */
+
+function FilterBar({
+  query,
+  onQuery,
+  route,
+  onRoute,
+  outcome,
+  onOutcome,
+  resultCount,
+  total,
+  hasFilters,
+  onClear,
+}: {
+  query: string;
+  onQuery: (v: string) => void;
+  route: RouteFilter;
+  onRoute: (v: RouteFilter) => void;
+  outcome: OutcomeFilter;
+  onOutcome: (v: OutcomeFilter) => void;
+  resultCount: number;
+  total: number;
+  hasFilters: boolean;
+  onClear: () => void;
+}) {
+  return (
+    <div className="mb-2 rounded-md border border-border/60 bg-background/30 p-2">
+      {/* Search input */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder="Search cycles…"
+          aria-label="Search cycles"
+          className="h-7 border-border/60 bg-background/40 pl-7 pr-7 font-mono text-[11px] text-foreground placeholder:font-sans placeholder:text-[11px] placeholder:text-muted-foreground/70"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => onQuery("")}
+            aria-label="Clear search"
+            className="absolute right-1.5 top-1/2 inline-flex h-4 w-4 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground transition hover:bg-border/60 hover:text-foreground"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+
+      {/* Chips + result count */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <ChipGroup label="ROUTE" chips={ROUTE_CHIPS} value={route} onChange={onRoute} />
+        <ChipGroup label="OUTCOME" chips={OUTCOME_CHIPS} value={outcome} onChange={onOutcome} />
+
+        <div className="ml-auto flex items-center gap-2">
+          <span className="font-mono text-[10px] text-muted-foreground">
+            <span className="text-[var(--aeon-core)]">{resultCount}</span> of {total} cycles
+          </span>
+          {hasFilters && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onClear}
+              className="h-6 px-2 text-[10px] text-muted-foreground hover:text-foreground"
+            >
+              <X className="mr-1 h-3 w-3" /> Clear
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChipGroup<T extends string>({
+  label,
+  chips,
+  value,
+  onChange,
+}: {
+  label: string;
+  chips: { value: T; label: string; color: string }[];
+  value: T;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="mr-1 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
+      {chips.map((c) => {
+        const active = value === c.value;
+        return (
+          <button
+            key={c.value}
+            type="button"
+            onClick={() => onChange(c.value)}
+            aria-pressed={active}
+            className="rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider transition hover:bg-background/60"
+            style={
+              active
+                ? {
+                    color: c.color,
+                    background: `color-mix(in oklch, ${c.color} 16%, transparent)`,
+                    borderColor: `color-mix(in oklch, ${c.color} 55%, transparent)`,
+                    boxShadow: `0 0 8px color-mix(in oklch, ${c.color} 38%, transparent)`,
+                  }
+                : {
+                    color: "var(--muted-foreground)",
+                    background: "transparent",
+                    borderColor: "var(--border)",
+                  }
+            }
+          >
+            {c.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -37,14 +37,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-aeon-core: var(--aeon-core);
-  --color-aeon-active: var(--aeon-active);
-  --color-aeon-warn: var(--aeon-warn);
-  --color-aeon-danger: var(--aeon-danger);
-  --color-aeon-perceive: var(--aeon-perceive);
-  --color-aeon-think: var(--aeon-think);
-  --color-aeon-act: var(--aeon-act);
-  --color-aeon-reflect: var(--aeon-reflect);
+  --color-aeon-core: oklch(0.82 0.15 75);
+  --color-aeon-active: oklch(0.74 0.16 158);
+  --color-aeon-warn: oklch(0.72 0.18 55);
+  --color-aeon-danger: oklch(0.64 0.21 18);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

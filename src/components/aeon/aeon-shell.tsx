@@ -27,6 +27,7 @@ import { IoTPanel } from "@/components/aeon/iot-panel";
 import { ConsolePanel } from "@/components/aeon/console-panel";
 import { CommandPalette } from "@/components/aeon/command-palette";
 import { MobileBottomNav } from "@/components/aeon/mobile-bottom-nav";
+import { NotificationCenter } from "@/components/aeon/notification-center";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -142,6 +143,9 @@ export function AeonShell() {
               </span>
               {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[var(--aeon-core)]" />}
             </div>
+
+            {/* notification center */}
+            <NotificationCenter />
 
             {/* command palette trigger */}
             <button

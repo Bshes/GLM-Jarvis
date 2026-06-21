@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Globe, MessageSquare, Cpu, Clock, Trash2, User, Bot,
   Sparkles, ChevronRight, Zap, Brain, RotateCw,
+  Download, FileText, FileJson,
 } from "lucide-react";
 import { useAeon } from "@/lib/store";
 import { timeAgo } from "@/components/aeon/ui";
@@ -62,6 +63,67 @@ export function ConsolePanel() {
   const localCount = chat.filter((t) => t.routing?.route === "local").length;
   const cloudCount = chat.filter((t) => t.routing?.route === "cloud").length;
   const webCount = chat.filter((t) => t.webResults && t.webResults.length > 0).length;
+  const canExport = chat.length > 0;
+
+  function exportMarkdown() {
+    if (chat.length === 0) return;
+    const lines: string[] = [];
+    lines.push("# A.E.O.N. Console Transcript");
+    lines.push(`Exported: ${new Date().toISOString()}`);
+    lines.push(`Turns: ${chat.length}`);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+    for (const turn of chat) {
+      if (turn.role === "user") {
+        const route = turn.routing;
+        const routeLabel = route ? (route.route === "cloud" ? "CLOUD" : "LOCAL") : "UNROUTED";
+        const model = route?.model ?? "—";
+        const complexity = route ? route.complexity.toFixed(2) : "—";
+        lines.push(`## 👤 You · ${timeAgo(turn.createdAt)} · [${routeLabel} · ${model} · ${complexity}]`);
+        lines.push("");
+        lines.push(turn.content);
+        lines.push("");
+        if (turn.webResults && turn.webResults.length > 0) {
+          lines.push("**Web sources cited:**");
+          turn.webResults.forEach((r, i) => {
+            lines.push(`${i + 1}. [${r.host_name}](${r.url}) — ${r.name}`);
+          });
+          lines.push("");
+        }
+      } else {
+        const dur = turn.durationMs ?? 0;
+        lines.push(`### 🤖 A.E.O.N. · ${dur}ms`);
+        lines.push("");
+        lines.push(turn.content);
+        lines.push("");
+      }
+      lines.push("---");
+      lines.push("");
+    }
+    const text = lines.join("\n");
+    const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aeon-console-${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${chat.length} turns as Markdown`);
+  }
+
+  function exportJSON() {
+    if (chat.length === 0) return;
+    const text = JSON.stringify(chat, null, 2);
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `aeon-console-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${chat.length} turns as JSON`);
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -159,6 +221,11 @@ export function ConsolePanel() {
           </Card>
 
           <RoutingLegend />
+          <ExportCard
+            onMarkdown={exportMarkdown}
+            onJSON={exportJSON}
+            disabled={!canExport}
+          />
         </div>
       </div>
     </div>
@@ -293,6 +360,52 @@ function RoutingLegend() {
             <p className="text-muted-foreground">complexity ≥ 0.66 → chain-of-thought enabled for hardest prompts.</p>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ExportCard({
+  onMarkdown,
+  onJSON,
+  disabled,
+}: {
+  onMarkdown: () => void;
+  onJSON: () => void;
+  disabled: boolean;
+}) {
+  return (
+    <Card className="border-border bg-card/40">
+      <CardContent className="p-3">
+        <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+          <Download className="h-3 w-3 text-[var(--aeon-core)]" /> export transcript
+        </div>
+        {disabled ? (
+          <p className="text-[10px] italic text-muted-foreground">No conversation to export yet</p>
+        ) : (
+          <div className="space-y-1.5">
+            <button
+              onClick={onMarkdown}
+              className="group flex w-full items-center gap-2 rounded-md border border-[var(--aeon-core)]/40 bg-[var(--aeon-core)]/5 p-2 text-left text-xs text-foreground transition hover:border-[var(--aeon-core)] hover:bg-[var(--aeon-core)]/10"
+            >
+              <FileText className="h-3.5 w-3.5 shrink-0 text-[var(--aeon-core)]" />
+              <span className="flex flex-col">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--aeon-core)]">Markdown</span>
+                <span className="text-[10px] text-muted-foreground">formatted transcript (.md)</span>
+              </span>
+            </button>
+            <button
+              onClick={onJSON}
+              className="group flex w-full items-center gap-2 rounded-md border border-[var(--aeon-active)]/40 bg-[var(--aeon-active)]/5 p-2 text-left text-xs text-foreground transition hover:border-[var(--aeon-active)] hover:bg-[var(--aeon-active)]/10"
+            >
+              <FileJson className="h-3.5 w-3.5 shrink-0 text-[var(--aeon-active)]" />
+              <span className="flex flex-col">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--aeon-active)]">JSON</span>
+                <span className="text-[10px] text-muted-foreground">raw turns array (.json)</span>
+              </span>
+            </button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -348,14 +348,14 @@ function ActionRow({
         {isPending && (
           <div className="flex shrink-0 flex-col gap-1">
             <Button size="sm" onClick={onApprove} disabled={resolving}
-              className="h-7 gap-1 border bg-[var(--aeon-active)]/10 text-[var(--aeon-active)] transition hover:bg-[var(--aeon-active)]/20 hover:shadow-[0_0_12px_color-mix(in_oklch,var(--aeon-active)_30%,transparent)]"
+              className="h-7 gap-1 border bg-[var(--aeon-active)]/10 text-[var(--aeon-active)] transition hover:bg-[var(--aeon-active)]/20"
               variant="outline"
               style={{ borderColor: "color-mix(in oklch, var(--aeon-active) 40%, transparent)" }}
             >
               {resolving ? <RotateCw className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Approve
             </Button>
             <Button size="sm" onClick={onDeny} disabled={resolving}
-              className="h-7 gap-1 border bg-[var(--aeon-danger)]/5 text-[var(--aeon-danger)] transition hover:bg-[var(--aeon-danger)]/15 hover:shadow-[0_0_12px_color-mix(in_oklch,var(--aeon-danger)_30%,transparent)]"
+              className="h-7 gap-1 border bg-[var(--aeon-danger)]/5 text-[var(--aeon-danger)] transition hover:bg-[var(--aeon-danger)]/15"
               variant="outline"
               style={{ borderColor: "color-mix(in oklch, var(--aeon-danger) 30%, transparent)" }}
             >
