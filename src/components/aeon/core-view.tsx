@@ -85,19 +85,19 @@ export function CoreView() {
           icon={Zap}
           label="Live Events"
           value={String(stream.length)}
-          accent="var(--aeon-core)"
+          accent="var(--a_core)"
         />
         <StatCard
           icon={Brain}
           label="Memories"
           value={String(memoryCount)}
-          accent="var(--aeon-active)"
+          accent="var(--a_active)"
         />
         <StatCard
           icon={Activity}
           label="Pending Actions"
           value={String(pendingActions)}
-          accent="var(--aeon-warn)"
+          accent="var(--a_warn)"
         />
       </div>
 
@@ -127,7 +127,7 @@ export function CoreView() {
           >
             <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
               <Terminal className="h-3 w-3" /> live cognition stream
-              <span className="ml-auto inline-flex h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" />
+              <span className="ml-auto inline-flex h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.16_158)] animate-aeon-pulse" />
             </div>
             <AnimatePresence initial={false}>
               {phaseEvents.length === 0 ? (
@@ -158,7 +158,7 @@ export function CoreView() {
                 size="sm"
                 onClick={() => void run()}
                 disabled={orchestrating || !input.trim()}
-                className="gap-1.5 bg-[var(--aeon-core)] text-[var(--primary-foreground)] hover:brightness-110"
+                className="gap-1.5 bg-[oklch(0.82_0.15_75)] text-[var(--primary-foreground)] hover:brightness-110"
               >
                 {orchestrating ? <RotateCw className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                 {orchestrating ? "Cycling…" : "Run Cycle"}
@@ -174,9 +174,9 @@ export function CoreView() {
                   key={s.label}
                   onClick={() => void run(s.label)}
                   disabled={orchestrating}
-                  className="group inline-flex items-center gap-1 rounded-sm border border-border/60 bg-background/40 px-2 py-1 text-left text-[11px] text-muted-foreground transition hover:border-[var(--aeon-core)]/50 hover:text-foreground disabled:opacity-40"
+                  className="group inline-flex items-center gap-1 rounded-sm border border-border/60 bg-background/40 px-2 py-1 text-left text-[11px] text-muted-foreground transition hover:border-[oklch(0.82_0.15_75)]/50 hover:text-foreground disabled:opacity-40"
                 >
-                  <span className="text-[9px] font-bold text-[var(--aeon-core)]">T{s.tier}</span>
+                  <span className="text-[9px] font-bold text-[oklch(0.82_0.15_75)]">T{s.tier}</span>
                   <span className="max-w-[200px] truncate">{s.label}</span>
                   <ChevronRight className="h-3 w-3 opacity-0 transition group-hover:opacity-100" />
                 </button>
@@ -235,28 +235,28 @@ function TelemetryIdle() {
       className="flex flex-col gap-3 py-2"
     >
       <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-        <Gauge className="h-3 w-3 text-[var(--aeon-active)]" />
+        <Gauge className="h-3 w-3 text-[oklch(0.74_0.16_158)]" />
         <span>system nominal · awaiting directive</span>
-        <span className="ml-auto inline-flex items-center gap-1 font-mono text-[var(--aeon-active)]">
-          <span className="h-1 w-1 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> idle
+        <span className="ml-auto inline-flex items-center gap-1 font-mono text-[oklch(0.74_0.16_158)]">
+          <span className="h-1 w-1 rounded-full bg-[oklch(0.74_0.16_158)] animate-aeon-pulse" /> idle
         </span>
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        <SparklineCard label="CPU LOAD" value={`${avgCpu}%`} data={cpuSeries} color="var(--aeon-core)" />
-        <SparklineCard label="MEM PRESSURE" value={`${avgMem}%`} data={memSeries} color="var(--aeon-active)" />
-        <SparklineCard label="NET I/O" value={`${(netSeries.slice(-1)[0] * 12).toFixed(1)} mb/s`} data={netSeries} color="var(--aeon-warn)" />
+        <SparklineCard label="CPU LOAD" value={`${avgCpu}%`} data={cpuSeries} color="var(--a_core)" />
+        <SparklineCard label="MEM PRESSURE" value={`${avgMem}%`} data={memSeries} color="var(--a_active)" />
+        <SparklineCard label="NET I/O" value={`${(netSeries.slice(-1)[0] * 12).toFixed(1)} mb/s`} data={netSeries} color="var(--a_warn)" />
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-[10px] sm:grid-cols-4">
-        <IdleStat label="AGENTS" value={String(agents.length)} color="var(--aeon-active)" />
-        <IdleStat label="MEMORIES" value={String(memoryCount)} color="var(--aeon-core)" />
-        <IdleStat label="CYCLES" value={String(cycles.length)} color="var(--aeon-think)" />
-        <IdleStat label="STATUS" value="READY" color="var(--aeon-active)" />
+        <IdleStat label="AGENTS" value={String(agents.length)} color="var(--a_active)" />
+        <IdleStat label="MEMORIES" value={String(memoryCount)} color="var(--a_core)" />
+        <IdleStat label="CYCLES" value={String(cycles.length)} color="var(--a_think)" />
+        <IdleStat label="STATUS" value="READY" color="var(--a_active)" />
       </div>
 
       <div className="flex items-center gap-1.5 pt-1 text-[10px] text-muted-foreground">
-        <Waves className="h-3 w-3 animate-pulse text-[var(--aeon-core)]" />
+        <Waves className="h-3 w-3 animate-pulse text-[oklch(0.82_0.15_75)]" />
         <span className="font-mono">cognitive loop primed · dispatch a directive to ignite</span>
       </div>
     </motion.div>
@@ -310,20 +310,20 @@ function CoreOrb({ phase, orchestrating }: { phase: LoopPhase | null; orchestrat
     <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} className="max-w-[340px]">
       <defs>
         <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="var(--aeon-core)" stopOpacity="0.9" />
-          <stop offset="45%" stopColor="var(--aeon-core)" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="var(--aeon-core)" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--a_core)" stopOpacity="0.9" />
+          <stop offset="45%" stopColor="var(--a_core)" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="var(--a_core)" stopOpacity="0" />
         </radialGradient>
         <filter id="blur"><feGaussianBlur stdDeviation="2" /></filter>
       </defs>
 
       {/* outer rotating dashed ring */}
       <g style={{ transformOrigin: "center", animation: "aeon-spin-slow 24s linear infinite" }}>
-        <circle cx={c} cy={c} r={orbitR + 18} fill="none" stroke="var(--aeon-core)" strokeOpacity="0.25" strokeWidth="1" strokeDasharray="2 8" />
+        <circle cx={c} cy={c} r={orbitR + 18} fill="none" stroke="var(--a_core)" strokeOpacity="0.25" strokeWidth="1" strokeDasharray="2 8" />
       </g>
       {/* counter-rotating ring */}
       <g style={{ transformOrigin: "center", animation: "aeon-spin-rev 32s linear infinite" }}>
-        <circle cx={c} cy={c} r={orbitR + 6} fill="none" stroke="var(--aeon-active)" strokeOpacity="0.18" strokeWidth="1" strokeDasharray="1 12" />
+        <circle cx={c} cy={c} r={orbitR + 6} fill="none" stroke="var(--a_active)" strokeOpacity="0.18" strokeWidth="1" strokeDasharray="1 12" />
       </g>
 
       {/* core glow */}
@@ -332,7 +332,7 @@ function CoreOrb({ phase, orchestrating }: { phase: LoopPhase | null; orchestrat
       {/* radar sweep when orchestrating */}
       {orchestrating && (
         <g style={{ transformOrigin: "center", animation: "aeon-sweep 2.4s linear infinite" }}>
-          <path d={`M ${c} ${c} L ${c} ${c - orbitR} A ${orbitR} ${orbitR} 0 0 1 ${c + 60} ${c - 104} Z`} fill="var(--aeon-core)" opacity="0.12" />
+          <path d={`M ${c} ${c} L ${c} ${c - orbitR} A ${orbitR} ${orbitR} 0 0 1 ${c + 60} ${c - 104} Z`} fill="var(--a_core)" opacity="0.12" />
         </g>
       )}
 
@@ -340,12 +340,12 @@ function CoreOrb({ phase, orchestrating }: { phase: LoopPhase | null; orchestrat
       <polygon
         points={hexPoints(c, c, 34)}
         fill="var(--background)"
-        stroke="var(--aeon-core)"
+        stroke="var(--a_core)"
         strokeWidth="1.5"
         className={orchestrating ? "aeon-glow-core" : ""}
-        style={{ filter: orchestrating ? "drop-shadow(0 0 8px var(--aeon-core))" : "none" }}
+        style={{ filter: orchestrating ? "drop-shadow(0 0 8px var(--a_core))" : "none" }}
       />
-      <text x={c} y={c - 2} textAnchor="middle" className="fill-[var(--aeon-core)] font-mono" fontSize="9" fontWeight="700" letterSpacing="2">A.E.O.N</text>
+      <text x={c} y={c - 2} textAnchor="middle" className="fill-[oklch(0.82_0.15_75)] font-mono" fontSize="9" fontWeight="700" letterSpacing="2">A.E.O.N</text>
       <text x={c} y={c + 10} textAnchor="middle" className="fill-[var(--muted-foreground)] font-mono" fontSize="6" letterSpacing="1">CORE v1.0</text>
 
       {/* phase nodes around the orbit */}
@@ -404,13 +404,13 @@ function hexPoints(cx: number, cy: number, r: number): string {
 
 function StreamLine({ e }: { e: { type: string; phase?: string; message?: string; level?: string; source?: string; ts: number } }) {
   const color =
-    e.type === "phase" ? "var(--aeon-core)"
-    : e.type === "routing" ? "var(--aeon-active)"
-    : e.type === "thought" ? "var(--aeon-think)"
-    : e.type === "action" ? "var(--aeon-act)"
-    : e.type === "memory" ? "var(--aeon-active)"
-    : e.type === "trigger" ? "var(--aeon-warn)"
-    : e.type === "error" ? "var(--aeon-danger)"
+    e.type === "phase" ? "var(--a_core)"
+    : e.type === "routing" ? "var(--a_active)"
+    : e.type === "thought" ? "var(--a_think)"
+    : e.type === "action" ? "var(--a_act)"
+    : e.type === "memory" ? "var(--a_active)"
+    : e.type === "trigger" ? "var(--a_warn)"
+    : e.type === "error" ? "var(--a_danger)"
     : "var(--muted-foreground)";
   const tag =
     e.type === "phase" ? (e.phase ?? "PHASE")

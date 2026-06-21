@@ -13,26 +13,26 @@ export const PHASE_META: Record<
 > = {
   PERCEIVE: {
     label: "PERCEIVE",
-    color: "var(--aeon-perceive)",
-    cssVar: "--aeon-perceive",
+    color: "var(--a_perceive)",
+    cssVar: "--a_perceive",
     description: "Ingest multimodal sensory data & evaluate against user state",
   },
   THINK: {
     label: "THINK",
-    color: "var(--aeon-think)",
-    cssVar: "--aeon-think",
+    color: "var(--a_think)",
+    cssVar: "--a_think",
     description: "Reason over memory graph, route to model, plan sub-tasks",
   },
   ACT: {
     label: "ACT",
-    color: "var(--aeon-act)",
-    cssVar: "--aeon-act",
+    color: "var(--a_act)",
+    cssVar: "--a_act",
     description: "Dispatch to sub-agents & execute tiered real-world actions",
   },
   REFLECT: {
     label: "REFLECT",
-    color: "var(--aeon-reflect)",
-    cssVar: "--aeon-reflect",
+    color: "var(--a_reflect)",
+    cssVar: "--a_reflect",
     description: "Score outcome, update memory, reinforce the loop",
   },
 };
@@ -47,22 +47,22 @@ export const TIER_META: Record<
   1: {
     label: "TIER 1",
     name: "Autonomous",
-    color: "var(--aeon-active)",
-    cssVar: "--aeon-active",
+    color: "var(--a_active)",
+    cssVar: "--a_active",
     behavior: "Execute immediately — smart home, scheduling, recall.",
   },
   2: {
     label: "TIER 2",
     name: "Confirmative",
-    color: "var(--aeon-warn)",
-    cssVar: "--aeon-warn",
+    color: "var(--a_warn)",
+    cssVar: "--a_warn",
     behavior: "Generate a yes/no confirmation prompt before executing.",
   },
   3: {
     label: "TIER 3",
     name: "Advisory",
-    color: "var(--aeon-danger)",
-    cssVar: "--aeon-danger",
+    color: "var(--a_danger)",
+    cssVar: "--a_danger",
     behavior: "Output a recommendation only. No side effects.",
   },
 };

@@ -9,10 +9,10 @@ import { embed, serialize } from "@/lib/embed";
 export const dynamic = "force-dynamic";
 
 const AGENTS = [
-  { name: "Coder", role: "Writes, tests & deploys code", description: "Generates and refactors code, runs it in a sandboxed container, and proposes merges. Tier-2 by default — destructive ops require confirmation.", color: "var(--aeon-act)", icon: "Code2", tier: 2, model: "cloud" },
-  { name: "Researcher", role: "Web research & synthesis", description: "Scrapes and synthesizes the web, citing sources. Autonomous recall; confirmative publication.", color: "var(--aeon-active)", icon: "Globe", tier: 1, model: "cloud" },
-  { name: "IoT", role: "Smart-home control", description: "Controls lights, locks, climate and sensors via the Home Assistant bridge. Fully autonomous tier-1.", color: "var(--aeon-core)", icon: "House", tier: 1, model: "local" },
-  { name: "Financial", role: "Bills, budget & forecasting", description: "Tracks spending, pays bills under threshold, and advises on investments. Advisory on large sums.", color: "var(--aeon-danger)", icon: "Wallet", tier: 3, model: "cloud" },
+  { name: "Coder", role: "Writes, tests & deploys code", description: "Generates and refactors code, runs it in a sandboxed container, and proposes merges. Tier-2 by default — destructive ops require confirmation.", color: "var(--a_act)", icon: "Code2", tier: 2, model: "cloud" },
+  { name: "Researcher", role: "Web research & synthesis", description: "Scrapes and synthesizes the web, citing sources. Autonomous recall; confirmative publication.", color: "var(--a_active)", icon: "Globe", tier: 1, model: "cloud" },
+  { name: "IoT", role: "Smart-home control", description: "Controls lights, locks, climate and sensors via the Home Assistant bridge. Fully autonomous tier-1.", color: "var(--a_core)", icon: "House", tier: 1, model: "local" },
+  { name: "Financial", role: "Bills, budget & forecasting", description: "Tracks spending, pays bills under threshold, and advises on investments. Advisory on large sums.", color: "var(--a_danger)", icon: "Wallet", tier: 3, model: "cloud" },
 ];
 
 const DEVICES = [

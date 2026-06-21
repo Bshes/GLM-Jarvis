@@ -76,17 +76,17 @@ export function TierBadge({ tier, className }: { tier: SafetyTier; className?: s
 export function StatusDot({ status }: { status: string }) {
   const map: Record<string, string> = {
     idle: "var(--muted-foreground)",
-    busy: "var(--aeon-warn)",
-    awaiting: "var(--aeon-core)",
-    error: "var(--aeon-danger)",
+    busy: "var(--a_warn)",
+    awaiting: "var(--a_core)",
+    error: "var(--a_danger)",
     offline: "var(--muted-foreground)",
-    online: "var(--aeon-active)",
-    executed: "var(--aeon-active)",
-    pending: "var(--aeon-warn)",
-    approved: "var(--aeon-active)",
-    denied: "var(--aeon-danger)",
-    advisory: "var(--aeon-danger)",
-    failed: "var(--aeon-danger)",
+    online: "var(--a_active)",
+    executed: "var(--a_active)",
+    pending: "var(--a_warn)",
+    approved: "var(--a_active)",
+    denied: "var(--a_danger)",
+    advisory: "var(--a_danger)",
+    failed: "var(--a_danger)",
   };
   const color = map[status] ?? "var(--muted-foreground)";
   const pulse = status === "busy" || status === "pending" || status === "awaiting";

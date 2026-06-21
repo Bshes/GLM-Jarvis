@@ -22,24 +22,24 @@ import { toast } from "sonner";
 
 /* ─── Channel metadata ─── */
 const CHANNEL_META: Record<string, { icon: React.ElementType; color: string }> = {
-  audio: { icon: Ear, color: "var(--aeon-active)" },
-  biometric: { icon: Heart, color: "var(--aeon-danger)" },
-  vision: { icon: Eye, color: "var(--aeon-core)" },
-  text: { icon: Send, color: "var(--aeon-think)" },
+  audio: { icon: Ear, color: "var(--a_active)" },
+  biometric: { icon: Heart, color: "var(--a_danger)" },
+  vision: { icon: Eye, color: "var(--a_core)" },
+  text: { icon: Send, color: "var(--a_think)" },
   system: { icon: Activity, color: "var(--muted-foreground)" },
 };
 
 /* ─── Biometric metric metadata (icon + animation) ─── */
 const BIO_META: Record<string, { icon: React.ElementType; color: string; label: string }> = {
-  heart_rate: { icon: Heart, color: "var(--aeon-danger)", label: "bpm" },
-  sleep_hours: { icon: Moon, color: "var(--aeon-think)", label: "hrs" },
-  steps: { icon: Footprints, color: "var(--aeon-active)", label: "steps" },
-  stress_index: { icon: Brain, color: "var(--aeon-warn)", label: "idx" },
-  posture: { icon: Activity, color: "var(--aeon-core)", label: "deg" },
+  heart_rate: { icon: Heart, color: "var(--a_danger)", label: "bpm" },
+  sleep_hours: { icon: Moon, color: "var(--a_think)", label: "hrs" },
+  steps: { icon: Footprints, color: "var(--a_active)", label: "steps" },
+  stress_index: { icon: Brain, color: "var(--a_warn)", label: "idx" },
+  posture: { icon: Activity, color: "var(--a_core)", label: "deg" },
 };
 
 /* ─── HUD corner bracket component ─── */
-function HudCorners({ size = 14, color = "var(--aeon-core)" }: { size?: number; color?: string }) {
+function HudCorners({ size = 14, color = "var(--a_core)" }: { size?: number; color?: string }) {
   return (
     <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ color }} aria-hidden>
       {/* top-left */}
@@ -66,7 +66,7 @@ function VoiceRings() {
         <motion.div
           key={i}
           className="absolute h-14 w-14 rounded-full border-2"
-          style={{ borderColor: "var(--aeon-active)" }}
+          style={{ borderColor: "var(--a_active)" }}
           initial={{ scale: 1, opacity: 0.6 }}
           animate={{
             scale: [1, 2.2 + i * 0.4],
@@ -115,7 +115,7 @@ function RecordingWaveform() {
       <path
         ref={pathRef}
         fill="none"
-        stroke="var(--aeon-active)"
+        stroke="var(--a_active)"
         strokeWidth="2"
         strokeLinecap="round"
         opacity="0.7"
@@ -125,7 +125,7 @@ function RecordingWaveform() {
 }
 
 /* ─── Heart-rate ECG line that draws itself ─── */
-function EcgLine({ color = "var(--aeon-danger)", speed = 2.5 }: { color?: string; speed?: number }) {
+function EcgLine({ color = "var(--a_danger)", speed = 2.5 }: { color?: string; speed?: number }) {
   return (
     <svg viewBox="0 0 200 40" className="h-6 w-full" preserveAspectRatio="none">
       <motion.path
@@ -152,7 +152,7 @@ function TtsWaveform() {
         <motion.div
           key={i}
           className="w-[3px] rounded-full"
-          style={{ backgroundColor: "var(--aeon-active)", originY: 1 }}
+          style={{ backgroundColor: "var(--a_active)", originY: 1 }}
           animate={{
             height: [4, 8 + Math.sin(i * 0.7) * 10, 4],
           }}
@@ -174,7 +174,7 @@ function TtsProgressBar({ progress }: { progress: number }) {
     <div className="h-1 w-full overflow-hidden rounded-full bg-border/40">
       <motion.div
         className="h-full rounded-full"
-        style={{ backgroundColor: "var(--aeon-active)" }}
+        style={{ backgroundColor: "var(--a_active)" }}
         initial={{ width: "0%" }}
         animate={{ width: `${Math.min(progress, 100)}%` }}
         transition={{ duration: 0.3, ease: "easeOut" }}
@@ -204,15 +204,15 @@ function CameraOverlay() {
     <>
       {/* REC indicator */}
       <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5">
-        <span className="animate-aeon-blink inline-block h-2 w-2 rounded-full bg-[var(--aeon-danger)]" />
-        <span className="font-mono text-[10px] font-bold text-[var(--aeon-danger)]">REC</span>
+        <span className="animate-aeon-blink inline-block h-2 w-2 rounded-full bg-[oklch(0.64_0.21_18)]" />
+        <span className="font-mono text-[10px] font-bold text-[oklch(0.64_0.21_18)]">REC</span>
       </div>
       {/* Timestamp */}
-      <div className="absolute right-2.5 top-2.5 font-mono text-[10px] text-[var(--aeon-core)]">
+      <div className="absolute right-2.5 top-2.5 font-mono text-[10px] text-[oklch(0.82_0.15_75)]">
         {time}
       </div>
       {/* CAM label */}
-      <div className="absolute bottom-2 left-2.5 font-mono text-[9px] text-[var(--aeon-core)]/70">
+      <div className="absolute bottom-2 left-2.5 font-mono text-[9px] text-[oklch(0.82_0.15_75)]/70">
         CAM_01 · PORCH
       </div>
       {/* Signal strength */}
@@ -223,7 +223,7 @@ function CameraOverlay() {
             className="w-[3px] rounded-sm"
             style={{
               height: `${4 + i * 3}px`,
-              backgroundColor: i < signal ? "var(--aeon-active)" : "var(--border)",
+              backgroundColor: i < signal ? "var(--a_active)" : "var(--border)",
               opacity: i < signal ? 0.8 : 0.3,
             }}
           />
@@ -233,14 +233,14 @@ function CameraOverlay() {
       <motion.div
         className="pointer-events-none absolute left-0 h-[2px] w-full"
         style={{
-          background: "linear-gradient(to right, transparent, var(--aeon-core), transparent)",
+          background: "linear-gradient(to right, transparent, var(--a_core), transparent)",
           opacity: 0.15,
         }}
         animate={{ top: ["0%", "100%"] }}
         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
       />
       {/* Corner brackets */}
-      <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ color: "var(--aeon-core)" }} aria-hidden>
+      <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ color: "var(--a_core)" }} aria-hidden>
         <line x1="4" y1="18" x2="4" y2="4" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />
         <line x1="4" y1="4" x2="18" y2="4" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />
         <line x1="calc(100% - 18px)" y1="4" x2="calc(100% - 4px)" y2="4" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />
@@ -456,16 +456,16 @@ export function SensoryPanel() {
     <div className="flex h-full flex-col gap-3">
       {/* ─── Stat tiles ─── */}
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-        <Stat label="Total Events" value={String(stats.total)} accent="var(--aeon-core)" />
-        <Stat label="Biometric" value={String(stats.biometric)} accent="var(--aeon-danger)" icon={Heart} />
-        <Stat label="Audio" value={String(stats.audio)} accent="var(--aeon-active)" icon={Ear} />
-        <Stat label="Vision" value={String(stats.vision)} accent="var(--aeon-think)" icon={Eye} />
+        <Stat label="Total Events" value={String(stats.total)} accent="var(--a_core)" />
+        <Stat label="Biometric" value={String(stats.biometric)} accent="var(--a_danger)" icon={Heart} />
+        <Stat label="Audio" value={String(stats.audio)} accent="var(--a_active)" icon={Ear} />
+        <Stat label="Vision" value={String(stats.vision)} accent="var(--a_think)" icon={Eye} />
       </div>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* ─── Voice input (ASR) ─── */}
         <Card className="relative overflow-hidden border-border/60 bg-card/40">
-          <HudCorners size={12} color="var(--aeon-active)" />
+          <HudCorners size={12} color="var(--a_active)" />
           <CardContent className="p-4">
             <div className="mb-2.5 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
               <Mic className="h-3 w-3" /> voice input · whisper asr
@@ -479,22 +479,22 @@ export function SensoryPanel() {
                   disabled={transcribing}
                   className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 transition disabled:opacity-50"
                   style={{
-                    borderColor: recording ? "var(--aeon-danger)" : "var(--aeon-active)",
+                    borderColor: recording ? "var(--a_danger)" : "var(--a_active)",
                     background: recording
-                      ? "color-mix(in oklch, var(--aeon-danger) 18%, transparent)"
-                      : "color-mix(in oklch, var(--aeon-active) 12%, transparent)",
+                      ? "color-mix(in oklch, var(--a_danger) 18%, transparent)"
+                      : "color-mix(in oklch, var(--a_active) 12%, transparent)",
                     boxShadow: recording
-                      ? "0 0 20px 2px color-mix(in oklch, var(--aeon-danger) 30%, transparent)"
-                      : "0 0 12px 1px color-mix(in oklch, var(--aeon-active) 15%, transparent)",
+                      ? "0 0 20px 2px color-mix(in oklch, var(--a_danger) 30%, transparent)"
+                      : "0 0 12px 1px color-mix(in oklch, var(--a_active) 15%, transparent)",
                   }}
                   whileTap={{ scale: 0.92 }}
                   animate={recording ? { scale: [1, 1.06, 1] } : {}}
                   transition={recording ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" } : {}}
                 >
                   {recording ? (
-                    <MicOff className="h-5 w-5 text-[var(--aeon-danger)]" />
+                    <MicOff className="h-5 w-5 text-[oklch(0.64_0.21_18)]" />
                   ) : (
-                    <Mic className="h-5 w-5 text-[var(--aeon-active)]" />
+                    <Mic className="h-5 w-5 text-[oklch(0.74_0.16_158)]" />
                   )}
                 </motion.button>
               </div>
@@ -525,7 +525,7 @@ export function SensoryPanel() {
                 size="sm"
                 onClick={() => { setTtsText(text); setTtsCompleted(false); }}
                 disabled={!text.trim()}
-                className="ml-auto gap-1.5 bg-[var(--aeon-core)] text-[var(--primary-foreground)] hover:brightness-110"
+                className="ml-auto gap-1.5 bg-[oklch(0.82_0.15_75)] text-[var(--primary-foreground)] hover:brightness-110"
               >
                 <Volume2 className="h-3.5 w-3.5" /> To TTS
               </Button>
@@ -535,17 +535,17 @@ export function SensoryPanel() {
 
         {/* ─── Speech output (TTS) ─── */}
         <Card className="relative overflow-hidden border-border/60 bg-card/40">
-          <HudCorners size={12} color={speaking ? "var(--aeon-active)" : "var(--aeon-core)"} />
+          <HudCorners size={12} color={speaking ? "var(--a_active)" : "var(--a_core)"} />
           <CardContent className="p-4">
             <div className="mb-2.5 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
               <Volume2 className="h-3 w-3" /> speech output · tts
               {speaking && (
-                <Badge variant="outline" className="ml-auto border-[var(--aeon-active)]/50 font-mono text-[9px] text-[var(--aeon-active)]">
+                <Badge variant="outline" className="ml-auto border-[oklch(0.74_0.16_158)]/50 font-mono text-[9px] text-[oklch(0.74_0.16_158)]">
                   LIVE
                 </Badge>
               )}
               {ttsCompleted && (
-                <Badge variant="outline" className="ml-auto border-[var(--aeon-core)]/50 font-mono text-[9px] text-[var(--aeon-core)]">
+                <Badge variant="outline" className="ml-auto border-[oklch(0.82_0.15_75)]/50 font-mono text-[9px] text-[oklch(0.82_0.15_75)]">
                   DONE
                 </Badge>
               )}
@@ -569,21 +569,21 @@ export function SensoryPanel() {
             </AnimatePresence>
             <div className="mt-2 flex items-center gap-2">
               {speaking ? (
-                <Button size="sm" onClick={stopSpeak} className="gap-1.5 border-[var(--aeon-danger)]/40 bg-[var(--aeon-danger)]/10 text-[var(--aeon-danger)] hover:bg-[var(--aeon-danger)]/20">
+                <Button size="sm" onClick={stopSpeak} className="gap-1.5 border-[oklch(0.64_0.21_18)]/40 bg-[oklch(0.64_0.21_18)]/10 text-[oklch(0.64_0.21_18)] hover:bg-[oklch(0.64_0.21_18)]/20">
                   <Square className="h-3.5 w-3.5" /> Stop
                 </Button>
               ) : (
-                <Button size="sm" onClick={speak} disabled={!ttsText.trim()} className="gap-1.5 bg-[var(--aeon-active)] text-[var(--primary-foreground)] hover:brightness-110">
+                <Button size="sm" onClick={speak} disabled={!ttsText.trim()} className="gap-1.5 bg-[oklch(0.74_0.16_158)] text-[var(--primary-foreground)] hover:brightness-110">
                   <Volume2 className="h-3.5 w-3.5" /> Speak
                 </Button>
               )}
               {speaking && (
-                <span className="flex items-center gap-1 font-mono text-[10px] text-[var(--aeon-active)]">
+                <span className="flex items-center gap-1 font-mono text-[10px] text-[oklch(0.74_0.16_158)]">
                   <CircleDot className="h-3 w-3 animate-pulse" /> synthesizing
                 </span>
               )}
               {ttsCompleted && !speaking && (
-                <span className="font-mono text-[10px] text-[var(--aeon-core)]">✓ playback complete</span>
+                <span className="font-mono text-[10px] text-[oklch(0.82_0.15_75)]">✓ playback complete</span>
               )}
             </div>
           </CardContent>
@@ -593,9 +593,9 @@ export function SensoryPanel() {
         <motion.div
           animate={
             bioFlash === "danger"
-              ? { boxShadow: "0 0 24px 4px color-mix(in oklch, var(--aeon-danger) 40%, transparent)" }
+              ? { boxShadow: "0 0 24px 4px color-mix(in oklch, var(--a_danger) 40%, transparent)" }
               : bioFlash === "active"
-                ? { boxShadow: "0 0 24px 4px color-mix(in oklch, var(--aeon-active) 40%, transparent)" }
+                ? { boxShadow: "0 0 24px 4px color-mix(in oklch, var(--a_active) 40%, transparent)" }
                 : { boxShadow: "0 0 0px 0px transparent" }
           }
           transition={{ duration: 0.3 }}
@@ -672,11 +672,11 @@ export function SensoryPanel() {
                   size="sm"
                   onClick={injectBiometric}
                   disabled={injecting}
-                  className="w-full gap-1.5 bg-[var(--aeon-danger)]/90 text-white hover:brightness-110"
+                  className="w-full gap-1.5 bg-[oklch(0.64_0.21_18)]/90 text-white hover:brightness-110"
                   style={{
                     boxShadow: injecting
-                      ? "0 0 16px 2px color-mix(in oklch, var(--aeon-danger) 40%, transparent)"
-                      : "0 0 8px 1px color-mix(in oklch, var(--aeon-danger) 15%, transparent)",
+                      ? "0 0 16px 2px color-mix(in oklch, var(--a_danger) 40%, transparent)"
+                      : "0 0 8px 1px color-mix(in oklch, var(--a_danger) 15%, transparent)",
                     animation: injecting ? "aeon-pulse 0.8s ease-in-out infinite" : undefined,
                   }}
                 >
@@ -706,7 +706,7 @@ export function SensoryPanel() {
 
         {/* ─── Vision parser / Camera feed ─── */}
         <Card className="relative overflow-hidden border-border/60 bg-card/40">
-          <HudCorners size={12} color="var(--aeon-think)" />
+          <HudCorners size={12} color="var(--a_think)" />
           <CardContent className="p-4">
             <div className="mb-2.5 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
               <Eye className="h-3 w-3" /> vision parser · camera feed
@@ -716,16 +716,16 @@ export function SensoryPanel() {
               <CameraOverlay />
               {/* Center content */}
               <div className="relative z-10 text-center">
-                <Eye className="mx-auto h-6 w-6 text-[var(--aeon-think)]/50" />
-                <p className="mt-0.5 font-mono text-[10px] text-[var(--aeon-active)]/70">● streaming · no motion</p>
+                <Eye className="mx-auto h-6 w-6 text-[oklch(0.82_0.15_75)]/50" />
+                <p className="mt-0.5 font-mono text-[10px] text-[oklch(0.74_0.16_158)]/70">● streaming · no motion</p>
               </div>
             </div>
             <div className="mt-2 flex gap-2">
-              <Button size="sm" variant="outline" onClick={injectMotion} className="gap-1.5 text-[var(--aeon-warn)]">
+              <Button size="sm" variant="outline" onClick={injectMotion} className="gap-1.5 text-[oklch(0.72_0.18_55)]">
                 <Radio className="h-3.5 w-3.5" /> Simulate Motion
               </Button>
               <div className="ml-auto flex items-center gap-1.5">
-                <Signal className="h-3 w-3 text-[var(--aeon-active)]" />
+                <Signal className="h-3 w-3 text-[oklch(0.74_0.16_158)]" />
                 <span className="font-mono text-[10px] text-muted-foreground">RTSP</span>
               </div>
             </div>
@@ -735,7 +735,7 @@ export function SensoryPanel() {
 
       {/* ─── Sensory feed ─── */}
       <Card className="relative min-h-0 flex-1 overflow-hidden border-border/60 bg-black/20">
-        <HudCorners size={14} color="var(--aeon-core)" />
+        <HudCorners size={14} color="var(--a_core)" />
         <CardContent className="p-3">
           <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
             <Activity className="h-3 w-3" /> sensory feed
@@ -759,7 +759,7 @@ export function SensoryPanel() {
                     transition={{ duration: 0.25, delay: 0 }}
                     className={`flex items-center gap-2 rounded-sm px-2 py-1.5 ${
                       isLatest
-                        ? "bg-[var(--aeon-core)]/8 border border-[var(--aeon-core)]/15"
+                        ? "bg-[oklch(0.82_0.15_75)]/8 border border-[oklch(0.82_0.15_75)]/15"
                         : "bg-background/30"
                     }`}
                   >

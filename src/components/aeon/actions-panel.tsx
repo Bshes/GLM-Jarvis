@@ -141,22 +141,22 @@ export function ActionsPanel() {
           whileHover={{ scale: 1.02 }}
           className={`group relative overflow-hidden rounded-lg border transition-shadow ${
             pending.length > 0
-              ? "border-[var(--aeon-warn)]/40 animate-aeon-pulse"
+              ? "border-[oklch(0.72_0.18_55)]/40 animate-aeon-pulse"
               : "border-border"
           }`}
-          style={pending.length > 0 ? { boxShadow: "0 0 0 1px color-mix(in oklch, var(--aeon-warn) 30%, transparent), 0 0 16px color-mix(in oklch, var(--aeon-warn) 20%, transparent)" } : {}}
+          style={pending.length > 0 ? { boxShadow: "0 0 0 1px color-mix(in oklch, var(--a_warn) 30%, transparent), 0 0 16px color-mix(in oklch, var(--a_warn) 20%, transparent)" } : {}}
           onClick={() => setFilter("pending")}
         >
-          <div className="h-1 w-full bg-gradient-to-r from-[var(--aeon-warn)] to-[var(--aeon-warn)]/50" />
+          <div className="h-1 w-full bg-gradient-to-r from-[oklch(0.72_0.18_55)] to-[oklch(0.72_0.18_55)]/50" />
           <div className="relative p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--aeon-warn)]/15">
-                  <Activity className="h-3.5 w-3.5 text-[var(--aeon-warn)]" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[oklch(0.72_0.18_55)]/15">
+                  <Activity className="h-3.5 w-3.5 text-[oklch(0.72_0.18_55)]" />
                 </div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--aeon-warn)]">PENDING</span>
+                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[oklch(0.72_0.18_55)]">PENDING</span>
               </div>
-              <span className="font-mono text-2xl font-bold text-[var(--aeon-warn)]">{pending.length}</span>
+              <span className="font-mono text-2xl font-bold text-[oklch(0.72_0.18_55)]">{pending.length}</span>
             </div>
             <div className="mt-1 text-[9px] uppercase tracking-wider text-muted-foreground">awaiting confirmation</div>
           </div>
@@ -165,10 +165,10 @@ export function ActionsPanel() {
 
       {/* Summary stats row */}
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-        <MiniStat icon={Check} label="Executed" value={String(executed.length)} color="var(--aeon-active)" />
-        <MiniStat icon={X} label="Denied" value={String(denied.length)} color="var(--aeon-danger)" />
-        <MiniStat icon={Layers} label="Advisory" value={String(advisory.length)} color="var(--aeon-core)" />
-        <MiniStat icon={Zap} label="Success Rate" value={`${successRate}%`} color={successRate >= 80 ? "var(--aeon-active)" : "var(--aeon-warn)"} />
+        <MiniStat icon={Check} label="Executed" value={String(executed.length)} color="var(--a_active)" />
+        <MiniStat icon={X} label="Denied" value={String(denied.length)} color="var(--a_danger)" />
+        <MiniStat icon={Layers} label="Advisory" value={String(advisory.length)} color="var(--a_core)" />
+        <MiniStat icon={Zap} label="Success Rate" value={`${successRate}%`} color={successRate >= 80 ? "var(--a_active)" : "var(--a_warn)"} />
       </div>
 
       {/* Tier policy strip */}
@@ -200,7 +200,7 @@ export function ActionsPanel() {
           [3, "Tier 3", actions.filter((a) => a.tier === 3).length],
         ] as [Filter, string, number][]).map(([f, label, count]) => {
           const active = filter === f;
-          const tierColor = typeof f === "number" ? TIER_META[f as SafetyTier]?.color : "var(--aeon-core)";
+          const tierColor = typeof f === "number" ? TIER_META[f as SafetyTier]?.color : "var(--a_core)";
           return (
             <button
               key={String(f)}
@@ -243,8 +243,8 @@ export function ActionsPanel() {
               {filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
                   <div className="relative flex h-12 w-12 items-center justify-center">
-                    <Layers className="h-5 w-5 text-[var(--aeon-core)]/60" />
-                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[var(--aeon-core)]/30 animate-aeon-pulse" />
+                    <Layers className="h-5 w-5 text-[oklch(0.82_0.15_75)]/60" />
+                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[oklch(0.82_0.15_75)]/30 animate-aeon-pulse" />
                   </div>
                   <p className="text-sm">No actions match this filter</p>
                   <p className="text-[10px] text-muted-foreground/60">Dispatch a directive or change the filter above</p>
@@ -277,11 +277,11 @@ function ActionRow({
   const meta = TIER_META[a.tier as SafetyTier];
   const isPending = a.status === "pending";
   const statusColor =
-    a.status === "executed" ? "var(--aeon-active)" :
-    a.status === "pending" ? "var(--aeon-warn)" :
-    a.status === "denied" ? "var(--aeon-danger)" :
-    a.status === "advisory" ? "var(--aeon-core)" :
-    a.status === "failed" ? "var(--aeon-danger)" :
+    a.status === "executed" ? "var(--a_active)" :
+    a.status === "pending" ? "var(--a_warn)" :
+    a.status === "denied" ? "var(--a_danger)" :
+    a.status === "advisory" ? "var(--a_core)" :
+    a.status === "failed" ? "var(--a_danger)" :
     "var(--muted-foreground)";
 
   return (
@@ -348,16 +348,16 @@ function ActionRow({
         {isPending && (
           <div className="flex shrink-0 flex-col gap-1">
             <Button size="sm" onClick={onApprove} disabled={resolving}
-              className="h-7 gap-1 border bg-[var(--aeon-active)]/10 text-[var(--aeon-active)] transition hover:bg-[var(--aeon-active)]/20"
+              className="h-7 gap-1 border bg-[oklch(0.74_0.16_158)]/10 text-[oklch(0.74_0.16_158)] transition hover:bg-[oklch(0.74_0.16_158)]/20"
               variant="outline"
-              style={{ borderColor: "color-mix(in oklch, var(--aeon-active) 40%, transparent)" }}
+              style={{ borderColor: "color-mix(in oklch, var(--a_active) 40%, transparent)" }}
             >
               {resolving ? <RotateCw className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />} Approve
             </Button>
             <Button size="sm" onClick={onDeny} disabled={resolving}
-              className="h-7 gap-1 border bg-[var(--aeon-danger)]/5 text-[var(--aeon-danger)] transition hover:bg-[var(--aeon-danger)]/15"
+              className="h-7 gap-1 border bg-[oklch(0.64_0.21_18)]/5 text-[oklch(0.64_0.21_18)] transition hover:bg-[oklch(0.64_0.21_18)]/15"
               variant="outline"
-              style={{ borderColor: "color-mix(in oklch, var(--aeon-danger) 30%, transparent)" }}
+              style={{ borderColor: "color-mix(in oklch, var(--a_danger) 30%, transparent)" }}
             >
               <X className="h-3 w-3" /> Deny
             </Button>
@@ -388,9 +388,9 @@ function SafetyModal() {
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && closeConfirm()}>
-      <DialogContent className="border-[var(--aeon-warn)]/40 bg-card">
+      <DialogContent className="border-[oklch(0.72_0.18_55)]/40 bg-card">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-mono text-[var(--aeon-warn)]">
+          <DialogTitle className="flex items-center gap-2 font-mono text-[oklch(0.72_0.18_55)]">
             <ShieldQuestion className="h-4 w-4" /> CONFIRMATIVE GATE — TIER 2
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -400,9 +400,9 @@ function SafetyModal() {
 
         {a && (
           <div className="space-y-3 py-2">
-            <div className="relative overflow-hidden rounded-md border border-[var(--aeon-warn)]/30 bg-background/40 p-3">
+            <div className="relative overflow-hidden rounded-md border border-[oklch(0.72_0.18_55)]/30 bg-background/40 p-3">
               {/* gradient top accent */}
-              <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-[var(--aeon-warn)] to-[var(--aeon-warn)]/40" />
+              <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-[oklch(0.72_0.18_55)] to-[oklch(0.72_0.18_55)]/40" />
               <div className="pl-2">
                 <div className="flex items-center gap-2">
                   <TierBadge tier={2} />
@@ -420,7 +420,7 @@ function SafetyModal() {
                 )}
               </div>
             </div>
-            <div className="flex items-start gap-2 rounded-md border border-[var(--aeon-warn)]/20 bg-[var(--aeon-warn)]/5 p-2.5 text-[11px] text-[var(--aeon-warn)]">
+            <div className="flex items-start gap-2 rounded-md border border-[oklch(0.72_0.18_55)]/20 bg-[oklch(0.72_0.18_55)]/5 p-2.5 text-[11px] text-[oklch(0.72_0.18_55)]">
               <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>By approving, A.E.O.N. will execute this action immediately with real side effects. Deny to discard it safely.</span>
             </div>
@@ -429,11 +429,11 @@ function SafetyModal() {
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => void decide("denied")} disabled={busy}
-            className="gap-1.5 border-[var(--aeon-danger)]/40 text-[var(--aeon-danger)] hover:bg-[var(--aeon-danger)]/10">
+            className="gap-1.5 border-[oklch(0.64_0.21_18)]/40 text-[oklch(0.64_0.21_18)] hover:bg-[oklch(0.64_0.21_18)]/10">
             <X className="h-4 w-4" /> Deny
           </Button>
           <Button onClick={() => void decide("approved")} disabled={busy}
-            className="gap-1.5 bg-[var(--aeon-active)] text-[var(--primary-foreground)] hover:brightness-110">
+            className="gap-1.5 bg-[oklch(0.74_0.16_158)] text-[var(--primary-foreground)] hover:brightness-110">
             {busy ? <RotateCw className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Approve & Execute
           </Button>
         </DialogFooter>

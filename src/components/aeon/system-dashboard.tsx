@@ -42,9 +42,9 @@ export function SystemDashboard() {
   return (
     <div className="rounded-lg border border-border bg-card/40 p-3">
       <div className="mb-3 flex items-center gap-2">
-        <Activity className="h-3.5 w-3.5 text-[var(--aeon-core)]" />
+        <Activity className="h-3.5 w-3.5 text-[oklch(0.82_0.15_75)]" />
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground">system dashboard</span>
-        <span className="ml-auto rounded-sm bg-[var(--aeon-active)]/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-[var(--aeon-active)]">LIVE</span>
+        <span className="ml-auto rounded-sm bg-[oklch(0.74_0.16_158)]/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-[oklch(0.74_0.16_158)]">LIVE</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -53,7 +53,7 @@ export function SystemDashboard() {
           label="Cycle Success"
           value={`${successRate}%`}
           pct={successRate / 100}
-          color={successRate >= 80 ? "var(--aeon-active)" : successRate >= 50 ? "var(--aeon-warn)" : "var(--aeon-danger)"}
+          color={successRate >= 80 ? "var(--a_active)" : successRate >= 50 ? "var(--a_warn)" : "var(--a_danger)"}
           detail={`${executedCycles}/${totalCycles} cycles`}
           series={durationSeries}
           seriesLabel="ms"
@@ -63,7 +63,7 @@ export function SystemDashboard() {
           label="Avg Latency"
           value={avgDuration > 1000 ? `${(avgDuration / 1000).toFixed(1)}s` : `${avgDuration}ms`}
           pct={Math.min(1, avgDuration / 10000)}
-          color={avgDuration < 3000 ? "var(--aeon-active)" : avgDuration < 6000 ? "var(--aeon-warn)" : "var(--aeon-danger)"}
+          color={avgDuration < 3000 ? "var(--a_active)" : avgDuration < 6000 ? "var(--a_warn)" : "var(--a_danger)"}
           detail={`p95: ${durationSeries.length >= 3 ? Math.round(durationSeries.sort((a, b) => b - a)[Math.floor(durationSeries.length * 0.2)]) : "—"}ms`}
           series={durationSeries}
           seriesLabel="ms"
@@ -73,7 +73,7 @@ export function SystemDashboard() {
           label="Memory Growth"
           value={String(memoryCount)}
           pct={Math.min(1, memoryCount / 100)}
-          color="var(--aeon-core)"
+          color="var(--a_core)"
           detail={`${cloudCycles}C / ${localCycles}L routes`}
           series={complexitySeries}
           seriesLabel="complexity"
@@ -83,7 +83,7 @@ export function SystemDashboard() {
           label="Agent Util."
           value={`${busyAgents}/${agents.length}`}
           pct={agents.length > 0 ? busyAgents / agents.length : 0}
-          color={busyAgents > 0 ? "var(--aeon-warn)" : "var(--aeon-active)"}
+          color={busyAgents > 0 ? "var(--a_warn)" : "var(--a_active)"}
           detail={`${totalTasks} tasks · ${pendingActions} pending`}
           series={undefined}
         />
@@ -92,22 +92,22 @@ export function SystemDashboard() {
       {/* Bottom strip: action summary + routing split */}
       <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-border/40 bg-background/30 px-3 py-2 text-[10px] text-muted-foreground">
         <span className="inline-flex items-center gap-1">
-          <TrendingUp className="h-3 w-3 text-[var(--aeon-active)]" />
+          <TrendingUp className="h-3 w-3 text-[oklch(0.74_0.16_158)]" />
           <span className="text-foreground/70 font-medium">{executedActions}</span> executed
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-[var(--aeon-warn)]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.72_0.18_55)]" />
           <span className="text-foreground/70 font-medium">{pendingActions}</span> pending
         </span>
         <span className="ml-auto inline-flex items-center gap-1.5">
-          <span className="text-[var(--aeon-active)]">LOCAL</span>
+          <span className="text-[oklch(0.74_0.16_158)]">LOCAL</span>
           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-border/40">
             <div
-              className="h-full rounded-full bg-[var(--aeon-active)]"
+              className="h-full rounded-full bg-[oklch(0.74_0.16_158)]"
               style={{ width: `${100 - cloudPct}%` }}
             />
           </div>
-          <span className="text-[var(--aeon-core)]">CLOUD</span>
+          <span className="text-[oklch(0.82_0.15_75)]">CLOUD</span>
           <span className="font-mono font-bold text-foreground/60">{cloudPct}%</span>
         </span>
       </div>

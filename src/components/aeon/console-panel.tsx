@@ -129,26 +129,26 @@ export function ConsolePanel() {
     <div className="flex h-full flex-col gap-4">
       {/* stats */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Turns" value={String(chat.length)} accent="var(--aeon-core)" icon={MessageSquare} />
-        <Stat label="Local Routes" value={String(localCount)} accent="var(--aeon-active)" icon={Cpu} />
-        <Stat label="Cloud Routes" value={String(cloudCount)} accent="var(--aeon-think)" icon={Brain} />
-        <Stat label="Web Searches" value={String(webCount)} accent="var(--aeon-warn)" icon={Globe} />
+        <Stat label="Turns" value={String(chat.length)} accent="var(--a_core)" icon={MessageSquare} />
+        <Stat label="Local Routes" value={String(localCount)} accent="var(--a_active)" icon={Cpu} />
+        <Stat label="Cloud Routes" value={String(cloudCount)} accent="var(--a_think)" icon={Brain} />
+        <Stat label="Web Searches" value={String(webCount)} accent="var(--a_warn)" icon={Globe} />
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
         {/* chat thread */}
         <div className="flex min-h-0 flex-col rounded-lg border border-border bg-black/30">
           <div className="flex items-center gap-2 border-b border-border/60 bg-background/40 px-3 py-2">
-            <Bot className="h-3.5 w-3.5 text-[var(--aeon-active)]" />
+            <Bot className="h-3.5 w-3.5 text-[oklch(0.74_0.16_158)]" />
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">direct llm console</span>
-            <span className="ml-auto inline-flex h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" />
+            <span className="ml-auto inline-flex h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.16_158)] animate-aeon-pulse" />
           </div>
 
           <div ref={scrollRef} className="aeon-scroll min-h-0 flex-1 overflow-y-auto p-3">
             {chat.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-3 py-12 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--aeon-core)]/30 bg-[var(--aeon-core)]/5">
-                  <Sparkles className="h-5 w-5 text-[var(--aeon-core)]" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[oklch(0.82_0.15_75)]/30 bg-[oklch(0.82_0.15_75)]/5">
+                  <Sparkles className="h-5 w-5 text-[oklch(0.82_0.15_75)]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">Direct reasoning channel open</p>
@@ -162,7 +162,7 @@ export function ConsolePanel() {
                 ))}
                 {chatLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 pl-9 text-xs text-muted-foreground">
-                    <RotateCw className="h-3 w-3 animate-spin text-[var(--aeon-core)]" />
+                    <RotateCw className="h-3 w-3 animate-spin text-[oklch(0.82_0.15_75)]" />
                     <span className="font-mono">reasoning…</span>
                   </motion.div>
                 )}
@@ -186,7 +186,7 @@ export function ConsolePanel() {
               disabled={chatLoading}
             />
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <Button size="sm" onClick={() => void send()} disabled={chatLoading || !message.trim()} className="gap-1.5 bg-[var(--aeon-core)] text-[var(--primary-foreground)] hover:brightness-110">
+              <Button size="sm" onClick={() => void send()} disabled={chatLoading || !message.trim()} className="gap-1.5 bg-[oklch(0.82_0.15_75)] text-[var(--primary-foreground)] hover:brightness-110">
                 {chatLoading ? <RotateCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                 Send
               </Button>
@@ -202,7 +202,7 @@ export function ConsolePanel() {
           <Card className="border-border bg-card/40">
             <CardContent className="p-3">
               <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-                <Sparkles className="h-3 w-3 text-[var(--aeon-core)]" /> suggestions
+                <Sparkles className="h-3 w-3 text-[oklch(0.82_0.15_75)]" /> suggestions
               </div>
               <div className="space-y-1.5">
                 {SUGGESTIONS.map((s) => (
@@ -210,9 +210,9 @@ export function ConsolePanel() {
                     key={s}
                     onClick={() => void send(s)}
                     disabled={chatLoading}
-                    className="group flex w-full items-start gap-1.5 rounded-md border border-border/40 bg-background/30 p-2 text-left text-xs text-muted-foreground transition hover:border-[var(--aeon-core)]/50 hover:text-foreground disabled:opacity-40"
+                    className="group flex w-full items-start gap-1.5 rounded-md border border-border/40 bg-background/30 p-2 text-left text-xs text-muted-foreground transition hover:border-[oklch(0.82_0.15_75)]/50 hover:text-foreground disabled:opacity-40"
                   >
-                    <ChevronRight className="mt-0.5 h-3 w-3 shrink-0 text-[var(--aeon-core)] opacity-0 transition group-hover:opacity-100" />
+                    <ChevronRight className="mt-0.5 h-3 w-3 shrink-0 text-[oklch(0.82_0.15_75)] opacity-0 transition group-hover:opacity-100" />
                     <span>{s}</span>
                   </button>
                 ))}
@@ -243,11 +243,11 @@ function TurnBubble({ turn }: { turn: import("@/lib/store").ChatTurnView }) {
       <div
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border"
         style={{
-          borderColor: isUser ? "var(--aeon-core)" : "var(--aeon-active)",
-          background: isUser ? "color-mix(in oklch, var(--aeon-core) 12%, transparent)" : "color-mix(in oklch, var(--aeon-active) 12%, transparent)",
+          borderColor: isUser ? "var(--a_core)" : "var(--a_active)",
+          background: isUser ? "color-mix(in oklch, var(--a_core) 12%, transparent)" : "color-mix(in oklch, var(--a_active) 12%, transparent)",
         }}
       >
-        {isUser ? <User className="h-3.5 w-3.5 text-[var(--aeon-core)]" /> : <Bot className="h-3.5 w-3.5 text-[var(--aeon-active)]" />}
+        {isUser ? <User className="h-3.5 w-3.5 text-[oklch(0.82_0.15_75)]" /> : <Bot className="h-3.5 w-3.5 text-[oklch(0.74_0.16_158)]" />}
       </div>
       <div className={`min-w-0 max-w-[85%] ${isUser ? "text-right" : ""}`}>
         <div className="mb-1 flex items-center gap-1.5 text-[9px] text-muted-foreground" style={{ flexDirection: isUser ? "row-reverse" : "row" }}>
@@ -264,14 +264,14 @@ function TurnBubble({ turn }: { turn: import("@/lib/store").ChatTurnView }) {
         <div
           className="rounded-md border px-3 py-2 text-sm leading-relaxed"
           style={{
-            borderColor: isUser ? "color-mix(in oklch, var(--aeon-core) 30%, transparent)" : "var(--border)",
-            background: isUser ? "color-mix(in oklch, var(--aeon-core) 6%, transparent)" : "var(--background)",
+            borderColor: isUser ? "color-mix(in oklch, var(--a_core) 30%, transparent)" : "var(--border)",
+            background: isUser ? "color-mix(in oklch, var(--a_core) 6%, transparent)" : "var(--background)",
           }}
         >
           {isUser ? (
             <p className="text-foreground/90">{turn.content}</p>
           ) : (
-            <div className="prose prose-invert prose-sm max-w-none text-foreground/90 [&_code]:rounded [&_code]:bg-background/60 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[11px] [&_code]:text-[var(--aeon-core)] [&_pre]:rounded-md [&_pre]:border [&_pre]:border-border/60 [&_pre]:bg-black/40 [&_pre]:p-2 [&_pre]:text-[11px]">
+            <div className="prose prose-invert prose-sm max-w-none text-foreground/90 [&_code]:rounded [&_code]:bg-background/60 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[11px] [&_code]:text-[oklch(0.82_0.15_75)] [&_pre]:rounded-md [&_pre]:border [&_pre]:border-border/60 [&_pre]:bg-black/40 [&_pre]:p-2 [&_pre]:text-[11px]">
               <ReactMarkdown>{turn.content}</ReactMarkdown>
             </div>
           )}
@@ -280,26 +280,26 @@ function TurnBubble({ turn }: { turn: import("@/lib/store").ChatTurnView }) {
         {/* routing badge for user turns */}
         {isUser && turn.routing && (
           <div className="mt-1.5 flex items-center justify-end gap-1.5">
-            <Badge variant="outline" className="border-border/60 font-mono text-[9px]" style={{ color: turn.routing.route === "cloud" ? "var(--aeon-core)" : "var(--aeon-active)" }}>
+            <Badge variant="outline" className="border-border/60 font-mono text-[9px]" style={{ color: turn.routing.route === "cloud" ? "var(--a_core)" : "var(--a_active)" }}>
               {turn.routing.route === "cloud" ? "CLOUD" : "LOCAL"} · {turn.routing.model}
             </Badge>
             <div className="flex items-center gap-1" title={`complexity ${turn.routing.complexity.toFixed(2)}`}>
               <div className="h-1 w-12 overflow-hidden rounded-full bg-border/40">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${Math.round(turn.routing.complexity * 100)}%`, background: turn.routing.route === "cloud" ? "var(--aeon-core)" : "var(--aeon-active)" }}
+                  style={{ width: `${Math.round(turn.routing.complexity * 100)}%`, background: turn.routing.route === "cloud" ? "var(--a_core)" : "var(--a_active)" }}
                 />
               </div>
               <span className="font-mono text-[9px] text-muted-foreground">{turn.routing.complexity.toFixed(2)}</span>
             </div>
-            {turn.routing.thinking && <Badge variant="outline" className="border-[var(--aeon-think)]/40 font-mono text-[9px] text-[var(--aeon-think)]">CO Thinking</Badge>}
+            {turn.routing.thinking && <Badge variant="outline" className="border-[oklch(0.82_0.15_75)]/40 font-mono text-[9px] text-[oklch(0.82_0.15_75)]">CO Thinking</Badge>}
           </div>
         )}
 
         {/* web search citations for user turns */}
         {isUser && turn.webResults && turn.webResults.length > 0 && (
           <div className="mt-1.5 space-y-1">
-            <div className="flex items-center justify-end gap-1 text-[9px] uppercase tracking-widest text-[var(--aeon-warn)]">
+            <div className="flex items-center justify-end gap-1 text-[9px] uppercase tracking-widest text-[oklch(0.72_0.18_55)]">
               <Globe className="h-2.5 w-2.5" /> {turn.webResults.length} web sources
             </div>
             <div className="space-y-0.5">
@@ -311,7 +311,7 @@ function TurnBubble({ turn }: { turn: import("@/lib/store").ChatTurnView }) {
                   rel="noreferrer"
                   className="block rounded-sm bg-background/40 px-2 py-1 text-right text-[10px] text-muted-foreground transition hover:text-foreground"
                 >
-                  <span className="font-mono text-[var(--aeon-warn)]">[{i + 1}]</span> {r.host_name} — {r.name.slice(0, 50)}
+                  <span className="font-mono text-[oklch(0.72_0.18_55)]">[{i + 1}]</span> {r.host_name} — {r.name.slice(0, 50)}
                 </a>
               ))}
             </div>
@@ -328,13 +328,13 @@ function ToggleChip({ icon: Icon, label, active, onClick }: { icon: React.Elemen
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] transition ${
         active
-          ? "border-[var(--aeon-core)] bg-[var(--aeon-core)]/10 text-foreground"
+          ? "border-[oklch(0.82_0.15_75)] bg-[oklch(0.82_0.15_75)]/10 text-foreground"
           : "border-border/60 text-muted-foreground hover:text-foreground"
       }`}
     >
-      <Icon className="h-3 w-3" style={{ color: active ? "var(--aeon-core)" : undefined }} />
+      <Icon className="h-3 w-3" style={{ color: active ? "var(--a_core)" : undefined }} />
       {label}
-      <span className={`ml-0.5 h-1.5 w-1.5 rounded-full ${active ? "bg-[var(--aeon-core)]" : "bg-muted-foreground/40"}`} />
+      <span className={`ml-0.5 h-1.5 w-1.5 rounded-full ${active ? "bg-[oklch(0.82_0.15_75)]" : "bg-muted-foreground/40"}`} />
     </button>
   );
 }
@@ -344,19 +344,19 @@ function RoutingLegend() {
     <Card className="border-border bg-card/40">
       <CardContent className="p-3">
         <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-          <Cpu className="h-3 w-3 text-[var(--aeon-active)]" /> routing policy
+          <Cpu className="h-3 w-3 text-[oklch(0.74_0.16_158)]" /> routing policy
         </div>
         <div className="space-y-2 text-[11px]">
           <div className="flex items-start gap-2">
-            <Badge variant="outline" className="border-[var(--aeon-active)]/40 font-mono text-[9px] text-[var(--aeon-active)]">LOCAL</Badge>
+            <Badge variant="outline" className="border-[oklch(0.74_0.16_158)]/40 font-mono text-[9px] text-[oklch(0.74_0.16_158)]">LOCAL</Badge>
             <p className="text-muted-foreground">complexity &lt; 0.5 → fast Llama-3, no chain-of-thought. Smart-home, scheduling, recall.</p>
           </div>
           <div className="flex items-start gap-2">
-            <Badge variant="outline" className="border-[var(--aeon-core)]/40 font-mono text-[9px] text-[var(--aeon-core)]">CLOUD</Badge>
+            <Badge variant="outline" className="border-[oklch(0.82_0.15_75)]/40 font-mono text-[9px] text-[oklch(0.82_0.15_75)]">CLOUD</Badge>
             <p className="text-muted-foreground">complexity ≥ 0.5 → Claude-3.5 Sonnet, with reasoning. Research, refactoring, analysis.</p>
           </div>
           <div className="flex items-start gap-2">
-            <Badge variant="outline" className="border-[var(--aeon-think)]/40 font-mono text-[9px] text-[var(--aeon-think)]">THINKING</Badge>
+            <Badge variant="outline" className="border-[oklch(0.82_0.15_75)]/40 font-mono text-[9px] text-[oklch(0.82_0.15_75)]">THINKING</Badge>
             <p className="text-muted-foreground">complexity ≥ 0.66 → chain-of-thought enabled for hardest prompts.</p>
           </div>
         </div>
@@ -378,7 +378,7 @@ function ExportCard({
     <Card className="border-border bg-card/40">
       <CardContent className="p-3">
         <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-          <Download className="h-3 w-3 text-[var(--aeon-core)]" /> export transcript
+          <Download className="h-3 w-3 text-[oklch(0.82_0.15_75)]" /> export transcript
         </div>
         {disabled ? (
           <p className="text-[10px] italic text-muted-foreground">No conversation to export yet</p>
@@ -386,21 +386,21 @@ function ExportCard({
           <div className="space-y-1.5">
             <button
               onClick={onMarkdown}
-              className="group flex w-full items-center gap-2 rounded-md border border-[var(--aeon-core)]/40 bg-[var(--aeon-core)]/5 p-2 text-left text-xs text-foreground transition hover:border-[var(--aeon-core)] hover:bg-[var(--aeon-core)]/10"
+              className="group flex w-full items-center gap-2 rounded-md border border-[oklch(0.82_0.15_75)]/40 bg-[oklch(0.82_0.15_75)]/5 p-2 text-left text-xs text-foreground transition hover:border-[oklch(0.82_0.15_75)] hover:bg-[oklch(0.82_0.15_75)]/10"
             >
-              <FileText className="h-3.5 w-3.5 shrink-0 text-[var(--aeon-core)]" />
+              <FileText className="h-3.5 w-3.5 shrink-0 text-[oklch(0.82_0.15_75)]" />
               <span className="flex flex-col">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--aeon-core)]">Markdown</span>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[oklch(0.82_0.15_75)]">Markdown</span>
                 <span className="text-[10px] text-muted-foreground">formatted transcript (.md)</span>
               </span>
             </button>
             <button
               onClick={onJSON}
-              className="group flex w-full items-center gap-2 rounded-md border border-[var(--aeon-active)]/40 bg-[var(--aeon-active)]/5 p-2 text-left text-xs text-foreground transition hover:border-[var(--aeon-active)] hover:bg-[var(--aeon-active)]/10"
+              className="group flex w-full items-center gap-2 rounded-md border border-[oklch(0.74_0.16_158)]/40 bg-[oklch(0.74_0.16_158)]/5 p-2 text-left text-xs text-foreground transition hover:border-[oklch(0.74_0.16_158)] hover:bg-[oklch(0.74_0.16_158)]/10"
             >
-              <FileJson className="h-3.5 w-3.5 shrink-0 text-[var(--aeon-active)]" />
+              <FileJson className="h-3.5 w-3.5 shrink-0 text-[oklch(0.74_0.16_158)]" />
               <span className="flex flex-col">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-[var(--aeon-active)]">JSON</span>
+                <span className="font-mono text-[11px] uppercase tracking-wider text-[oklch(0.74_0.16_158)]">JSON</span>
                 <span className="text-[10px] text-muted-foreground">raw turns array (.json)</span>
               </span>
             </button>

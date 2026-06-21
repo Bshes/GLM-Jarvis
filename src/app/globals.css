@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -37,10 +36,6 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-aeon-core: oklch(0.82 0.15 75);
-  --color-aeon-active: oklch(0.74 0.16 158);
-  --color-aeon-warn: oklch(0.72 0.18 55);
-  --color-aeon-danger: oklch(0.64 0.21 18);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -82,17 +77,16 @@
   --input: oklch(1 0 0 / 10%);
   --ring: oklch(0.80 0.15 75 / 60%);
 
-  /* A.E.O.N. semantic palette */
-  --aeon-core: oklch(0.82 0.15 75);        /* amber gold — the core */
-  --aeon-active: oklch(0.74 0.16 158);     /* emerald — online/active/tier1 */
-  --aeon-warn: oklch(0.72 0.18 55);        /* orange — tier2 / caution */
-  --aeon-danger: oklch(0.64 0.21 18);      /* rose — tier3 / alert */
-
-  /* Cognitive loop phases */
-  --aeon-perceive: oklch(0.74 0.16 158);   /* emerald */
-  --aeon-think: oklch(0.82 0.15 75);       /* amber */
-  --aeon-act: oklch(0.72 0.18 55);         /* orange */
-  --aeon-reflect: oklch(0.66 0.16 350);    /* rose-plum */
+  /* A.E.O.N. semantic palette — using underscore prefix to avoid Tailwind v4
+     namespace detection (which generates invalid var(--aeon-*) in shadow utilities) */
+  --a_core: oklch(0.82 0.15 75);
+  --a_active: oklch(0.74 0.16 158);
+  --a_warn: oklch(0.72 0.18 55);
+  --a_danger: oklch(0.64 0.21 18);
+  --a_perceive: oklch(0.74 0.16 158);
+  --a_think: oklch(0.82 0.15 75);
+  --a_act: oklch(0.72 0.18 55);
+  --a_reflect: oklch(0.66 0.16 350);
 
   --chart-1: oklch(0.82 0.15 75);
   --chart-2: oklch(0.74 0.16 158);
@@ -117,6 +111,10 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* Prevent Tailwind v4 from injecting var(--aeon-*) as a shadow-color fallback
+       (caused by text-/bg-[var(--aeon-*)] arbitrary values registering the "aeon"
+       color namespace). Reset to a safe transparent default. */
+    --tw-shadow-color: 0 0 0 transparent;
   }
   html {
     color-scheme: dark;

@@ -247,9 +247,9 @@ export function CommandPalette() {
     system: "System Actions",
   };
   const GROUP_COLOR: Record<string, string> = {
-    navigate: "var(--aeon-active)",
-    dispatch: "var(--aeon-core)",
-    system: "var(--aeon-warn)",
+    navigate: "var(--a_active)",
+    dispatch: "var(--a_core)",
+    system: "var(--a_warn)",
   };
 
   // Flatten for index tracking across groups.
@@ -260,7 +260,7 @@ export function CommandPalette() {
       <DialogContent className="max-w-xl gap-0 overflow-hidden border-border bg-popover/95 p-0 backdrop-blur-xl [&>button]:hidden">
         {/* Search input */}
         <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
-          <Search className="h-4 w-4 shrink-0 text-[var(--aeon-core)]" />
+          <Search className="h-4 w-4 shrink-0 text-[oklch(0.82_0.15_75)]" />
           <input
             ref={inputRef}
             value={query}
@@ -303,18 +303,18 @@ export function CommandPalette() {
                         onClick={() => void cmd.action()}
                         className="group flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition"
                         style={{
-                          background: isSel ? "color-mix(in oklch, var(--aeon-core) 10%, transparent)" : "transparent",
-                          boxShadow: isSel ? "inset 0 0 0 1px color-mix(in oklch, var(--aeon-core) 35%, transparent)" : "none",
+                          background: isSel ? "color-mix(in oklch, var(--a_core) 10%, transparent)" : "transparent",
+                          boxShadow: isSel ? "inset 0 0 0 1px color-mix(in oklch, var(--a_core) 35%, transparent)" : "none",
                         }}
                       >
                         <div
                           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border"
                           style={{
-                            borderColor: isSel ? "color-mix(in oklch, var(--aeon-core) 40%, transparent)" : "var(--border)",
-                            background: isSel ? "color-mix(in oklch, var(--aeon-core) 14%, transparent)" : "var(--background)",
+                            borderColor: isSel ? "color-mix(in oklch, var(--a_core) 40%, transparent)" : "var(--border)",
+                            background: isSel ? "color-mix(in oklch, var(--a_core) 14%, transparent)" : "var(--background)",
                           }}
                         >
-                          <Icon className="h-3.5 w-3.5" style={{ color: isSel ? "var(--aeon-core)" : "var(--muted-foreground)" }} />
+                          <Icon className="h-3.5 w-3.5" style={{ color: isSel ? "var(--a_core)" : "var(--muted-foreground)" }} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-sm text-foreground">{cmd.label}</div>
@@ -326,7 +326,7 @@ export function CommandPalette() {
                           </kbd>
                         )}
                         {isSel && (
-                          <CornerDownLeft className="h-3 w-3 shrink-0 text-[var(--aeon-core)]" />
+                          <CornerDownLeft className="h-3 w-3 shrink-0 text-[oklch(0.82_0.15_75)]" />
                         )}
                       </button>
                     );

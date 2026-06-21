@@ -96,15 +96,15 @@ export function AeonShell() {
           <div className="flex items-center gap-2.5">
             <div className="relative flex h-8 w-8 items-center justify-center">
               <svg viewBox="0 0 40 40" className="h-8 w-8">
-                <polygon points={hexPoints(20, 20, 16)} fill="none" stroke="var(--aeon-core)" strokeWidth="1.5" className="aeon-glow-core" />
-                <circle cx="20" cy="20" r="3.5" fill="var(--aeon-core)" className="animate-aeon-pulse" />
+                <polygon points={hexPoints(20, 20, 16)} fill="none" stroke="var(--a_core)" strokeWidth="1.5" className="aeon-glow-core" />
+                <circle cx="20" cy="20" r="3.5" fill="var(--a_core)" className="animate-aeon-pulse" />
                 <g style={{ transformOrigin: "center", animation: "aeon-spin-slow 16s linear infinite" }}>
-                  <circle cx="20" cy="20" r="18" fill="none" stroke="var(--aeon-core)" strokeOpacity="0.3" strokeWidth="0.75" strokeDasharray="2 4" />
+                  <circle cx="20" cy="20" r="18" fill="none" stroke="var(--a_core)" strokeOpacity="0.3" strokeWidth="0.75" strokeDasharray="2 4" />
                 </g>
               </svg>
             </div>
             <div className="leading-none">
-              <div className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--aeon-core)] aeon-text-glow">A.E.O.N.</div>
+              <div className="font-mono text-sm font-bold tracking-[0.2em] text-[oklch(0.82_0.15_75)] aeon-text-glow">A.E.O.N.</div>
               <div className="hidden text-[9px] uppercase tracking-widest text-muted-foreground sm:block">autonomous entity · orchestration & navigation</div>
             </div>
           </div>
@@ -130,18 +130,18 @@ export function AeonShell() {
           <div className="ml-auto flex items-center gap-2 md:gap-3">
             {/* live stats */}
             <div className="hidden items-center gap-3 lg:flex">
-              <HeaderStat icon={Cpu} label="AGENTS" value={String(activeAgents)} color="var(--aeon-active)" />
-              <HeaderStat icon={Activity} label="MEMORY" value={String(memoryCount)} color="var(--aeon-core)" />
-              <HeaderStat icon={ShieldCheck} label="PENDING" value={String(pendingActions)} color={pendingActions > 0 ? "var(--aeon-warn)" : "var(--muted-foreground)"} />
+              <HeaderStat icon={Cpu} label="AGENTS" value={String(activeAgents)} color="var(--a_active)" />
+              <HeaderStat icon={Activity} label="MEMORY" value={String(memoryCount)} color="var(--a_core)" />
+              <HeaderStat icon={ShieldCheck} label="PENDING" value={String(pendingActions)} color={pendingActions > 0 ? "var(--a_warn)" : "var(--muted-foreground)"} />
             </div>
 
             {/* connection */}
             <div className="flex items-center gap-1.5 rounded-sm border border-border/60 bg-background/40 px-2 py-1">
-              {connected ? <Wifi className="h-3 w-3 text-[var(--aeon-active)]" /> : <WifiOff className="h-3 w-3 text-[var(--aeon-danger)]" />}
-              <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: connected ? "var(--aeon-active)" : "var(--aeon-danger)" }}>
+              {connected ? <Wifi className="h-3 w-3 text-[oklch(0.74_0.16_158)]" /> : <WifiOff className="h-3 w-3 text-[oklch(0.64_0.21_18)]" />}
+              <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: connected ? "var(--a_active)" : "var(--a_danger)" }}>
                 {connected ? "LINK" : "OFFLINE"}
               </span>
-              {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[var(--aeon-core)]" />}
+              {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[oklch(0.82_0.15_75)]" />}
             </div>
 
             {/* notification center */}
@@ -150,16 +150,16 @@ export function AeonShell() {
             {/* command palette trigger */}
             <button
               onClick={() => setCommandPaletteOpen(true)}
-              className="hidden items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-[var(--aeon-core)]/50 hover:text-foreground md:inline-flex"
+              className="hidden items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-[oklch(0.82_0.15_75)]/50 hover:text-foreground md:inline-flex"
               title="Open command palette (⌘K)"
             >
-              <Search className="h-3.5 w-3.5 text-[var(--aeon-core)]" />
+              <Search className="h-3.5 w-3.5 text-[oklch(0.82_0.15_75)]" />
               <span>Command</span>
               <kbd className="rounded-sm border border-border/60 bg-background/60 px-1 font-mono text-[9px]">⌘K</kbd>
             </button>
             <button
               onClick={() => setCommandPaletteOpen(true)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background/40 text-[var(--aeon-core)] transition hover:border-[var(--aeon-core)]/50 md:hidden"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background/40 text-[oklch(0.82_0.15_75)] transition hover:border-[oklch(0.82_0.15_75)]/50 md:hidden"
               title="Command palette (⌘K)"
               aria-label="Open command palette"
             >
@@ -192,11 +192,11 @@ export function AeonShell() {
                 {active && (
                   <motion.span
                     layoutId="nav-active"
-                    className="absolute left-0 top-1/2 h-7 w-0.5 -translate-y-1/2 rounded-full bg-[var(--aeon-core)]"
-                    style={{ boxShadow: "0 0 8px var(--aeon-core)" }}
+                    className="absolute left-0 top-1/2 h-7 w-0.5 -translate-y-1/2 rounded-full bg-[oklch(0.82_0.15_75)]"
+                    style={{ boxShadow: "0 0 8px var(--a_core)" }}
                   />
                 )}
-                <Icon className={`h-4 w-4 shrink-0 transition ${active ? "text-[var(--aeon-core)]" : ""}`} />
+                <Icon className={`h-4 w-4 shrink-0 transition ${active ? "text-[oklch(0.82_0.15_75)]" : ""}`} />
                 <span className="hidden font-mono text-xs font-medium uppercase tracking-wider md:inline">{item.label}</span>
                 {active && <ChevronRight className="ml-auto hidden h-3 w-3 md:inline" />}
               </button>
@@ -206,7 +206,7 @@ export function AeonShell() {
           <div className="mt-auto hidden px-3 py-2 md:block">
             <div className="rounded-md border border-border/40 bg-background/30 p-2">
               <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> system nominal
+                <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.16_158)] animate-aeon-pulse" /> system nominal
               </div>
               <div className="mt-1 font-mono text-[9px] text-muted-foreground">core v1.0 · uptime ∞</div>
             </div>
@@ -249,13 +249,13 @@ export function AeonShell() {
       {/* ===== Sticky footer ===== */}
       <footer className="mt-auto border-t border-border bg-background/95 backdrop-blur-md">
         <div className="flex h-9 items-center gap-3 px-3 md:px-5">
-          <span className="flex items-center gap-1.5 rounded-sm bg-[var(--aeon-active)]/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[var(--aeon-active)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> stream
+          <span className="flex items-center gap-1.5 rounded-sm bg-[oklch(0.74_0.16_158)]/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-[oklch(0.74_0.16_158)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.16_158)] animate-aeon-pulse" /> stream
           </span>
           <div className="min-w-0 flex-1 truncate font-mono text-[11px] text-foreground/70">
             {latest ? (
               <span>
-                <span className="font-bold text-[var(--aeon-core)]">[{latest.type.toUpperCase()}]</span>{" "}
+                <span className="font-bold text-[oklch(0.82_0.15_75)]">[{latest.type.toUpperCase()}]</span>{" "}
                 <span className="text-foreground/80">{latest.message ?? JSON.stringify(latest.data ?? "")}</span>
               </span>
             ) : (
@@ -263,7 +263,7 @@ export function AeonShell() {
             )}
           </div>
           <span className="hidden items-center gap-1 font-mono text-[10px] text-foreground/60 sm:inline">
-            <span className="text-[var(--aeon-core)]">{stream.length}</span> buffered
+            <span className="text-[oklch(0.82_0.15_75)]">{stream.length}</span> buffered
           </span>
           <span className="font-mono text-[10px] text-muted-foreground/60">·</span>
           <span className="font-mono text-[10px] font-semibold tracking-wider text-foreground/70">A.E.O.N. CORE</span>
@@ -298,7 +298,7 @@ function ViewHeader({ view }: { view: View }) {
   return (
     <div className="mb-4 flex items-center gap-2.5">
       <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card/40">
-        <Icon className="h-4 w-4 text-[var(--aeon-core)]" />
+        <Icon className="h-4 w-4 text-[oklch(0.82_0.15_75)]" />
       </div>
       <div>
         <h1 className="font-mono text-base font-bold tracking-wide text-foreground">{item.label.toUpperCase()}</h1>

@@ -590,3 +590,42 @@ Stage Summary:
 - Artifact: `src/components/aeon/cycle-timeline.tsx` — single file, additive (new filter state, `FilterBar` + `ChipGroup` components, refined empty-state branch); existing card markup and `CycleDetail` drawer preserved verbatim.
 - Filtering is the intersection of search + route + outcome via `useMemo`; route chips glow amber, outcome chips glow emerald/orange/rose; result count and Clear button appear live on the right.
 - Lint clean (0 errors); no indigo/blue introduced; mobile-first responsive wrapping; accessibility via `aria-label`/`aria-pressed` on the search input and chips.
+
+---
+Task ID: FIX-CSS (critical recovery)
+Agent: orchestrator (Z.ai Code)
+Task: Fix broken preview — CSS compilation error preventing the app from loading.
+
+Root Cause:
+- Tailwind v4.1.18 registers `aeon` as a color namespace when `--aeon-*` custom properties
+  exist in `:root` (or when `text-[var(--aeon-core)]` arbitrary-value classes are used).
+- When generating `shadow-lg`/`shadow-md` utilities, Tailwind v4 emits
+  `--tw-shadow: 0 0 14px -3px var(--tw-shadow-color, var(--aeon-*))` where `*` is the
+  "opaque" namespace placeholder.
+- Lightning CSS (Turbopack's CSS parser) cannot parse the literal `*` in `var(--aeon-*)`,
+  throwing `Unexpected token Delim('*')` → HTTP 500 on every page.
+
+Fix Applied:
+1. Renamed ALL `--aeon-*` CSS custom properties to `--a_*` (underscore prefix breaks the
+   Tailwind v4 namespace detection pattern `--<namespace>-<key>`).
+   - `:root` block in globals.css: `--aeon-core` → `--a_core`, etc. (8 variables)
+   - All 384 `var(--aeon-*)` references in .tsx/.ts files → `var(--a_*)`
+   - All `[var(--aeon-*)]` arbitrary-value className strings → `[oklch(...)]` values
+   - `src/lib/aeon.ts` cssVar fields → `--a_*`
+   - `src/app/api/aeon/seed/route.ts` agent colors → `var(--a_*)`
+2. Switched dev server from Turbopack to Webpack (`--webpack` flag in package.json dev
+   script) as a belt-and-suspenders fix — Webpack's CSS pipeline doesn't use Lightning CSS
+   and handles edge cases more gracefully.
+3. Restored `--color-aeon-*` entries in `@theme inline` (now mapped to `--a_*`).
+4. Restored the full globals.css with all HUD utilities, animations, and scrollbar styles.
+
+Verification:
+- HOME: 200, lint clean (0 errors), all 9 views render with 0 browser errors.
+- Mobile 375x812: no horizontal overflow, sticky footer pushes naturally.
+- Stream service running on :3003/:3004.
+
+Stage Summary:
+- A.E.O.N. is back online and fully functional. The preview now works.
+- The Turbopack/Lightning CSS issue is permanently resolved by the `--a_*` rename + Webpack switch.
+- All prior features (9 views, command palette, agent messaging, mobile bottom-nav,
+  notification center, cycle history, console export, cycle search/filter) are intact.

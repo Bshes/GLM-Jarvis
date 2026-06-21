@@ -86,12 +86,12 @@ interface TypeMeta {
 }
 
 const TYPE_META: Record<DeviceType, TypeMeta> = {
-  light: { color: "var(--aeon-core)", icon: Lightbulb, label: "LIGHT" },
-  thermostat: { color: "var(--aeon-warn)", icon: Thermometer, label: "CLIMATE" },
-  lock: { color: "var(--aeon-active)", icon: Lock, label: "LOCK" },
-  blinds: { color: "var(--aeon-reflect)", icon: Blinds, label: "BLINDS" },
-  speaker: { color: "var(--aeon-core)", icon: Speaker, label: "AUDIO" },
-  camera: { color: "var(--aeon-danger)", icon: Camera, label: "CAMERA" },
+  light: { color: "var(--a_core)", icon: Lightbulb, label: "LIGHT" },
+  thermostat: { color: "var(--a_warn)", icon: Thermometer, label: "CLIMATE" },
+  lock: { color: "var(--a_active)", icon: Lock, label: "LOCK" },
+  blinds: { color: "var(--a_reflect)", icon: Blinds, label: "BLINDS" },
+  speaker: { color: "var(--a_core)", icon: Speaker, label: "AUDIO" },
+  camera: { color: "var(--a_danger)", icon: Camera, label: "CAMERA" },
 };
 
 function isDeviceType(t: string): t is DeviceType {
@@ -436,7 +436,7 @@ function ControlShell({
             <div className="font-mono text-[9px] tracking-widest uppercase text-muted-foreground">
               {meta.label}
               {offline && (
-                <span className="ml-1.5 text-[var(--aeon-danger)]">· OFFLINE</span>
+                <span className="ml-1.5 text-[oklch(0.64_0.21_18)]">· OFFLINE</span>
               )}
             </div>
           </div>
@@ -448,7 +448,7 @@ function ControlShell({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="font-mono text-[9px] tracking-widest uppercase text-[var(--aeon-core)] flex items-center gap-1"
+                className="font-mono text-[9px] tracking-widest uppercase text-[oklch(0.82_0.15_75)] flex items-center gap-1"
               >
                 <Loader2 className="h-2.5 w-2.5 animate-spin" />
                 sync
@@ -506,7 +506,7 @@ function LightControl({
       >
         <div className="flex items-center justify-between mb-1.5">
           <RowLabel>Brightness</RowLabel>
-          <span className="font-mono text-xs text-[var(--aeon-core)]">
+          <span className="font-mono text-xs text-[oklch(0.82_0.15_75)]">
             {state.brightness}%
           </span>
         </div>
@@ -524,7 +524,7 @@ function LightControl({
         <div className="flex items-center gap-1">
           {(["warm", "cool"] as const).map((c) => {
             const cColor =
-              c === "warm" ? "var(--aeon-core)" : "var(--aeon-active)";
+              c === "warm" ? "var(--a_core)" : "var(--a_active)";
             const selected = state.color === c;
             return (
               <button
@@ -576,7 +576,7 @@ function ThermostatControl({
           >
             <Minus className="h-3 w-3" />
           </Button>
-          <div className="font-mono text-xl tabular-nums w-14 text-center text-[var(--aeon-warn)]">
+          <div className="font-mono text-xl tabular-nums w-14 text-center text-[oklch(0.72_0.18_55)]">
             {state.temp}°
           </div>
           <Button
@@ -628,7 +628,7 @@ function LockControl({
   onPatch: (patch: Partial<LockState>) => void;
 }) {
   const locked = state.locked;
-  const color = locked ? "var(--aeon-active)" : "var(--aeon-warn)";
+  const color = locked ? "var(--a_active)" : "var(--a_warn)";
   const Icon = locked ? Lock : LockOpen;
   return (
     <button
@@ -673,7 +673,7 @@ function BlindsControl({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <RowLabel>Open</RowLabel>
-        <span className="font-mono text-xs text-[var(--aeon-reflect)]">
+        <span className="font-mono text-xs text-[oklch(0.66_0.16_350)]">
           {state.open}%
         </span>
       </div>
@@ -718,7 +718,7 @@ function SpeakerControl({
       >
         <div className="flex items-center justify-between mb-1.5">
           <RowLabel>Volume</RowLabel>
-          <span className="font-mono text-xs text-[var(--aeon-core)]">
+          <span className="font-mono text-xs text-[oklch(0.82_0.15_75)]">
             {state.volume}
           </span>
         </div>
@@ -744,7 +744,7 @@ function CameraControl({
   onPatch: (patch: Partial<CameraState>) => void;
 }) {
   const motionColor = state.motion
-    ? "var(--aeon-danger)"
+    ? "var(--a_danger)"
     : "var(--muted-foreground)";
   return (
     <div className="space-y-3">
@@ -884,7 +884,7 @@ function RoomCard({
       <CardHeader className="pb-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="font-mono text-[10px] tracking-widest uppercase text-[var(--aeon-core)]">
+            <div className="font-mono text-[10px] tracking-widest uppercase text-[oklch(0.82_0.15_75)]">
               ROOM
             </div>
             <CardTitle className="text-base leading-none truncate">
@@ -946,10 +946,10 @@ export function IoTPanel() {
             <div
               className="flex h-9 w-9 items-center justify-center rounded-md"
               style={{
-                color: "var(--aeon-core)",
-                background: "color-mix(in oklch, var(--aeon-core) 16%, transparent)",
+                color: "var(--a_core)",
+                background: "color-mix(in oklch, var(--a_core) 16%, transparent)",
                 boxShadow:
-                  "0 0 0 1px color-mix(in oklch, var(--aeon-core) 35%, transparent), 0 0 18px -6px color-mix(in oklch, var(--aeon-core) 60%, transparent)",
+                  "0 0 0 1px color-mix(in oklch, var(--a_core) 35%, transparent), 0 0 18px -6px color-mix(in oklch, var(--a_core) 60%, transparent)",
               }}
             >
               <Activity className="h-4 w-4" />
@@ -1000,12 +1000,12 @@ export function IoTPanel() {
                   onClick={() => runScene(scene)}
                   className="h-auto py-1.5 px-2.5 gap-2 font-mono text-[10px] tracking-wider uppercase transition-all"
                   style={{
-                    color: isActive ? "var(--background)" : "var(--aeon-core)",
+                    color: isActive ? "var(--background)" : "var(--a_core)",
                     background: isActive
-                      ? "var(--aeon-core)"
-                      : "color-mix(in oklch, var(--aeon-core) 8%, transparent)",
+                      ? "var(--a_core)"
+                      : "color-mix(in oklch, var(--a_core) 8%, transparent)",
                     borderColor:
-                      "color-mix(in oklch, var(--aeon-core) 35%, transparent)",
+                      "color-mix(in oklch, var(--a_core) 35%, transparent)",
                   }}
                   title={scene.description}
                   aria-label={`Activate ${scene.name} scene`}

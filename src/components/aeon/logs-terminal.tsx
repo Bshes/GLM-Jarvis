@@ -59,23 +59,23 @@ const LEVEL_META: Record<string, LevelMeta> = {
     icon: Code2,
   },
   INFO: {
-    color: "var(--aeon-active)",
-    bg: "color-mix(in oklch, var(--aeon-active) 10%, transparent)",
-    border: "color-mix(in oklch, var(--aeon-active) 30%, transparent)",
+    color: "var(--a_active)",
+    bg: "color-mix(in oklch, var(--a_active) 10%, transparent)",
+    border: "color-mix(in oklch, var(--a_active) 30%, transparent)",
     icon: CheckCircle,
   },
   WARN: {
-    color: "var(--aeon-warn)",
-    bg: "color-mix(in oklch, var(--aeon-warn) 10%, transparent)",
-    border: "color-mix(in oklch, var(--aeon-warn) 30%, transparent)",
+    color: "var(--a_warn)",
+    bg: "color-mix(in oklch, var(--a_warn) 10%, transparent)",
+    border: "color-mix(in oklch, var(--a_warn) 30%, transparent)",
     icon: AlertCircle,
   },
   ERROR: {
-    color: "var(--aeon-danger)",
-    bg: "color-mix(in oklch, var(--aeon-danger) 10%, transparent)",
-    border: "color-mix(in oklch, var(--aeon-danger) 35%, transparent)",
+    color: "var(--a_danger)",
+    bg: "color-mix(in oklch, var(--a_danger) 10%, transparent)",
+    border: "color-mix(in oklch, var(--a_danger) 35%, transparent)",
     icon: AlertTriangle,
-    glow: "0 0 14px 2px color-mix(in oklch, var(--aeon-danger) 35%, transparent)",
+    glow: "0 0 14px 2px color-mix(in oklch, var(--a_danger) 35%, transparent)",
   },
 };
 
@@ -213,7 +213,7 @@ function LogRow({ log }: { log: LogView }) {
         borderLeft: `2.5px solid ${meta.color}`,
         background: meta.bg,
         boxShadow: meta.glow
-          ? `${meta.glow}, inset 0 0 24px color-mix(in oklch, var(--aeon-danger) 4%, transparent)`
+          ? `${meta.glow}, inset 0 0 24px color-mix(in oklch, var(--a_danger) 4%, transparent)`
           : undefined,
       }}
     >
@@ -224,10 +224,10 @@ function LogRow({ log }: { log: LogView }) {
       <SeverityBadge level={log.level} />
 
       {/* Source */}
-      <span className="shrink-0 font-mono text-[10px] text-[var(--aeon-core)]/70">
+      <span className="shrink-0 font-mono text-[10px] text-[oklch(0.82_0.15_75)]/70">
         {log.source}
         {log.phase ? (
-          <span className="text-[var(--aeon-core)]/40">·{log.phase}</span>
+          <span className="text-[oklch(0.82_0.15_75)]/40">·{log.phase}</span>
         ) : null}
       </span>
 
@@ -244,9 +244,9 @@ function LogRow({ log }: { log: LogView }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-20 text-muted-foreground/50">
-      <Terminal className="h-8 w-8" style={{ color: "var(--aeon-core)", opacity: 0.3 }} />
+      <Terminal className="h-8 w-8" style={{ color: "var(--a_core)", opacity: 0.3 }} />
       <span className="font-mono text-sm">
-        <span className="animate-aeon-blink inline-block h-4 w-2 translate-y-[2px] bg-[var(--aeon-core)]/50" />
+        <span className="animate-aeon-blink inline-block h-4 w-2 translate-y-[2px] bg-[oklch(0.82_0.15_75)]/50" />
         {" "}awaiting log entries…
       </span>
     </div>
@@ -262,25 +262,25 @@ function LiveTailIndicator({ newCount }: { newCount: number }) {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className="flex items-center gap-2 rounded-md border border-[var(--aeon-active)]/30 bg-[var(--aeon-active)]/10 px-3 py-1"
+      className="flex items-center gap-2 rounded-md border border-[oklch(0.74_0.16_158)]/30 bg-[oklch(0.74_0.16_158)]/10 px-3 py-1"
     >
       <span className="relative inline-flex h-2 w-2">
         <span
           className="absolute inline-flex h-full w-full rounded-full opacity-60"
           style={{
-            background: "var(--aeon-active)",
+            background: "var(--a_active)",
             animation: "aeon-pulse 1s ease-in-out infinite",
           }}
         />
         <span
           className="relative inline-flex h-2 w-2 rounded-full"
-          style={{ background: "var(--aeon-active)" }}
+          style={{ background: "var(--a_active)" }}
         />
       </span>
-      <span className="font-mono text-[10px] font-bold tracking-widest uppercase text-[var(--aeon-active)]">
+      <span className="font-mono text-[10px] font-bold tracking-widest uppercase text-[oklch(0.74_0.16_158)]">
         LIVE
       </span>
-      <span className="rounded-sm bg-[var(--aeon-active)]/20 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[var(--aeon-active)]">
+      <span className="rounded-sm bg-[oklch(0.74_0.16_158)]/20 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[oklch(0.74_0.16_158)]">
         +{newCount}
       </span>
     </motion.div>
@@ -483,7 +483,7 @@ export function LogsTerminal() {
         <Stat
           label="Total"
           value={String(logs.length)}
-          accent="var(--aeon-core)"
+          accent="var(--a_core)"
           icon={<Terminal className="h-3 w-3" />}
         />
         {(["DEBUG", "INFO", "WARN", "ERROR"] as const).map((lv) => {
@@ -521,12 +521,12 @@ export function LogsTerminal() {
                 style={
                   isActive
                     ? {
-                        borderColor: lv === "ALL" ? "var(--aeon-core)" : meta.color,
+                        borderColor: lv === "ALL" ? "var(--a_core)" : meta.color,
                         background:
                           lv === "ALL"
-                            ? "color-mix(in oklch, var(--aeon-core) 10%, transparent)"
+                            ? "color-mix(in oklch, var(--a_core) 10%, transparent)"
                             : meta.bg,
-                        boxShadow: `0 0 8px color-mix(in oklch, ${lv === "ALL" ? "var(--aeon-core)" : meta.color} 15%, transparent)`,
+                        boxShadow: `0 0 8px color-mix(in oklch, ${lv === "ALL" ? "var(--a_core)" : meta.color} 15%, transparent)`,
                       }
                     : undefined
                 }
@@ -552,7 +552,7 @@ export function LogsTerminal() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="filter source / message…"
-            className="h-7 w-40 rounded-sm border border-border/60 bg-background/60 pl-7 pr-2 font-mono text-[11px] outline-none transition-colors focus:border-[var(--aeon-core)]/50"
+            className="h-7 w-40 rounded-sm border border-border/60 bg-background/60 pl-7 pr-2 font-mono text-[11px] outline-none transition-colors focus:border-[oklch(0.82_0.15_75)]/50"
           />
         </div>
 
@@ -561,7 +561,7 @@ export function LogsTerminal() {
           onClick={() => setGroupBySource((g) => !g)}
           className={`rounded-sm border px-2 py-1 font-mono text-[10px] transition-all ${
             groupBySource
-              ? "border-[var(--aeon-core)]/40 bg-[var(--aeon-core)]/10 text-foreground"
+              ? "border-[oklch(0.82_0.15_75)]/40 bg-[oklch(0.82_0.15_75)]/10 text-foreground"
               : "border-border/40 text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -593,7 +593,7 @@ export function LogsTerminal() {
       <div className="aeon-grid-bg relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-black/50">
         {/* Title bar */}
         <div className="flex items-center gap-2 border-b border-border/60 bg-background/40 px-3 py-1.5">
-          <Terminal className="h-3 w-3 text-[var(--aeon-active)]" />
+          <Terminal className="h-3 w-3 text-[oklch(0.74_0.16_158)]" />
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             aeon://system/log
           </span>
@@ -603,16 +603,16 @@ export function LogsTerminal() {
             <span
               className="absolute inline-flex h-full w-full rounded-full opacity-50"
               style={{
-                background: "var(--aeon-active)",
+                background: "var(--a_active)",
                 animation: "aeon-pulse 2.4s ease-in-out infinite",
               }}
             />
             <span
               className="relative inline-flex h-1.5 w-1.5 rounded-full"
-              style={{ background: "var(--aeon-active)" }}
+              style={{ background: "var(--a_active)" }}
             />
           </span>
-          <span className="font-mono text-[10px] text-[var(--aeon-active)]">
+          <span className="font-mono text-[10px] text-[oklch(0.74_0.16_158)]">
             live
           </span>
 

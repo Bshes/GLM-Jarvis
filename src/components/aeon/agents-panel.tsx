@@ -60,11 +60,11 @@ function agentIconSafe(name: string): LucideIcon {
 
 /** Kind → accent color (per task spec). */
 const KIND_META: Record<AgentMessageKind, { color: string; label: string }> = {
-  delegate: { color: "var(--aeon-warn)", label: "DELEGATE" },
-  status: { color: "var(--aeon-active)", label: "STATUS" },
-  result: { color: "var(--aeon-core)", label: "RESULT" },
-  query: { color: "var(--aeon-think)", label: "QUERY" },
-  response: { color: "var(--aeon-active)", label: "RESPONSE" },
+  delegate: { color: "var(--a_warn)", label: "DELEGATE" },
+  status: { color: "var(--a_active)", label: "STATUS" },
+  result: { color: "var(--a_core)", label: "RESULT" },
+  query: { color: "var(--a_think)", label: "QUERY" },
+  response: { color: "var(--a_active)", label: "RESPONSE" },
 };
 
 /** All compose-able kinds. */
@@ -75,7 +75,7 @@ function agentColor(
   name: string,
   agents: { name: string; color: string }[],
 ): string {
-  return agents.find((a) => a.name === name)?.color ?? "var(--aeon-core)";
+  return agents.find((a) => a.name === name)?.color ?? "var(--a_core)";
 }
 
 export function AgentsPanel() {
@@ -166,10 +166,10 @@ export function AgentsPanel() {
     <div className="flex h-full flex-col gap-4">
       {/* header */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Active Agents" value={String(agents.length)} accent="var(--aeon-core)" />
-        <Stat label="Busy Now" value={String(busyCount)} accent="var(--aeon-warn)" />
-        <Stat label="Tasks Completed" value={String(totalTasks)} accent="var(--aeon-active)" />
-        <Stat label="Models Online" value="2" accent="var(--aeon-active)" />
+        <Stat label="Active Agents" value={String(agents.length)} accent="var(--a_core)" />
+        <Stat label="Busy Now" value={String(busyCount)} accent="var(--a_warn)" />
+        <Stat label="Tasks Completed" value={String(totalTasks)} accent="var(--a_active)" />
+        <Stat label="Models Online" value="2" accent="var(--a_active)" />
       </div>
 
       {/* agent grid */}
@@ -239,7 +239,7 @@ export function AgentsPanel() {
                 onClick={() => setTarget(a.name)}
                 className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-xs transition ${
                   target === a.name
-                    ? "border-[var(--aeon-core)] bg-[var(--aeon-core)]/10 text-foreground"
+                    ? "border-[oklch(0.82_0.15_75)] bg-[oklch(0.82_0.15_75)]/10 text-foreground"
                     : "border-border/60 text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -256,7 +256,7 @@ export function AgentsPanel() {
             disabled={busy}
           />
           <div className="mt-2 flex items-center gap-2">
-            <Button size="sm" onClick={() => void run()} disabled={busy || !task.trim()} className="gap-1.5 bg-[var(--aeon-core)] text-[var(--primary-foreground)] hover:brightness-110">
+            <Button size="sm" onClick={() => void run()} disabled={busy || !task.trim()} className="gap-1.5 bg-[oklch(0.82_0.15_75)] text-[var(--primary-foreground)] hover:brightness-110">
               {busy ? <RotateCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
               Dispatch to {target}
             </Button>
@@ -276,16 +276,16 @@ export function AgentsPanel() {
               <Mail className="h-3 w-3" /> inter-agent message bus
             </div>
             <span className="ml-auto inline-flex items-center gap-1.5 rounded-sm border border-border/60 px-2 py-0.5 font-mono text-[9px] text-muted-foreground">
-              <Radio className="h-2.5 w-2.5 text-[var(--aeon-active)]" />
+              <Radio className="h-2.5 w-2.5 text-[oklch(0.74_0.16_158)]" />
               live · {agentMessages.length}
             </span>
             {unread > 0 && (
               <span
                 className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold"
                 style={{
-                  color: "var(--aeon-danger)",
-                  background: `color-mix(in oklch, var(--aeon-danger) 14%, transparent)`,
-                  boxShadow: `inset 0 0 0 1px color-mix(in oklch, var(--aeon-danger) 35%, transparent)`,
+                  color: "var(--a_danger)",
+                  background: `color-mix(in oklch, var(--a_danger) 14%, transparent)`,
+                  boxShadow: `inset 0 0 0 1px color-mix(in oklch, var(--a_danger) 35%, transparent)`,
                 }}
               >
                 <Inbox className="h-2.5 w-2.5" /> {unread} unread
@@ -394,7 +394,7 @@ export function AgentsPanel() {
                 size="sm"
                 onClick={() => void send()}
                 disabled={!subject.trim() || !body.trim()}
-                className="mt-1 gap-1.5 bg-[var(--aeon-active)] text-[var(--primary-foreground)] hover:brightness-110"
+                className="mt-1 gap-1.5 bg-[oklch(0.74_0.16_158)] text-[var(--primary-foreground)] hover:brightness-110"
               >
                 <Send className="h-3.5 w-3.5" />
                 Send {from === "Orchestrator" ? "" : `from ${from}`} → {to}
@@ -497,8 +497,8 @@ function MessageRow({
               title="unread"
               className="ml-1 inline-flex h-2 w-2 rounded-full"
               style={{
-                background: "var(--aeon-danger)",
-                boxShadow: "0 0 6px color-mix(in oklch, var(--aeon-danger) 70%, transparent)",
+                background: "var(--a_danger)",
+                boxShadow: "0 0 6px color-mix(in oklch, var(--a_danger) 70%, transparent)",
               }}
             />
           )}

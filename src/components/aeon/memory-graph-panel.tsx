@@ -55,11 +55,11 @@ interface KindMeta {
 }
 
 const KIND_META: Record<string, KindMeta> = {
-  entity: { color: "var(--aeon-core)", icon: Boxes, label: "Entity" },
-  concept: { color: "var(--aeon-active)", icon: Brain, label: "Concept" },
-  person: { color: "var(--aeon-warn)", icon: UserIcon, label: "Person" },
-  place: { color: "var(--aeon-danger)", icon: MapPin, label: "Place" },
-  event: { color: "var(--aeon-reflect)", icon: Calendar, label: "Event" },
+  entity: { color: "var(--a_core)", icon: Boxes, label: "Entity" },
+  concept: { color: "var(--a_active)", icon: Brain, label: "Concept" },
+  person: { color: "var(--a_warn)", icon: UserIcon, label: "Person" },
+  place: { color: "var(--a_danger)", icon: MapPin, label: "Place" },
+  event: { color: "var(--a_reflect)", icon: Calendar, label: "Event" },
   device: { color: "var(--chart-5)", icon: Wrench, label: "Device" },
   agent: { color: "oklch(0.76 0.15 125)", icon: Bot, label: "Agent" },
 };
@@ -465,9 +465,9 @@ export default function MemoryGraphPanel() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="relative grid place-items-center">
-            <Network className="h-5 w-5 text-[color:var(--aeon-core)]" />
+            <Network className="h-5 w-5 text-[color:var(--a_core)]" />
             <span
-              className="pointer-events-none absolute inset-0 text-[color:var(--aeon-core)] opacity-40 blur-md"
+              className="pointer-events-none absolute inset-0 text-[color:var(--a_core)] opacity-40 blur-md"
               aria-hidden
             >
               <Network className="h-5 w-5" />
@@ -487,19 +487,19 @@ export default function MemoryGraphPanel() {
             icon={Boxes}
             label="NODES"
             value={graph.nodes.length}
-            color="var(--aeon-core)"
+            color="var(--a_core)"
           />
           <StatChip
             icon={Link2}
             label="EDGES"
             value={graph.edges.length}
-            color="var(--aeon-active)"
+            color="var(--a_active)"
           />
           <StatChip
             icon={Database}
             label="VECTORS"
             value={memoryCount}
-            color="var(--aeon-warn)"
+            color="var(--a_warn)"
           />
         </div>
       </div>
@@ -560,7 +560,7 @@ export default function MemoryGraphPanel() {
                           y2={b.y}
                           stroke={
                             hi
-                              ? "var(--aeon-core)"
+                              ? "var(--a_core)"
                               : "oklch(0.62 0.04 75 / 0.42)"
                           }
                           strokeWidth={hi ? 2 : 1}
@@ -583,7 +583,7 @@ export default function MemoryGraphPanel() {
                           className="font-mono"
                           fill={
                             hi
-                              ? "var(--aeon-core)"
+                              ? "var(--a_core)"
                               : "oklch(0.62 0.03 75 / 0.7)"
                           }
                           style={{
@@ -741,7 +741,7 @@ export default function MemoryGraphPanel() {
                 onClick={() => setSideTab(t.id)}
                 className={`relative flex flex-1 items-center justify-center gap-1.5 px-2 py-2.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-colors ${
                   sideTab === t.id
-                    ? "text-[color:var(--aeon-core)]"
+                    ? "text-[color:var(--a_core)]"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -750,8 +750,8 @@ export default function MemoryGraphPanel() {
                 {sideTab === t.id && (
                   <motion.span
                     layoutId="memtab-underline"
-                    className="absolute bottom-0 left-2 right-2 h-[2px] bg-[color:var(--aeon-core)]"
-                    style={{ boxShadow: "0 0 8px var(--aeon-core)" }}
+                    className="absolute bottom-0 left-2 right-2 h-[2px] bg-[color:var(--a_core)]"
+                    style={{ boxShadow: "0 0 8px var(--a_core)" }}
                   />
                 )}
               </button>
@@ -813,7 +813,7 @@ export default function MemoryGraphPanel() {
                                 {gn.label?.toLowerCase() === "user" && (
                                   <Badge
                                     variant="outline"
-                                    className="h-4 px-1 text-[8px] text-[color:var(--aeon-core)]"
+                                    className="h-4 px-1 text-[8px] text-[color:var(--a_core)]"
                                   >
                                     PIN
                                   </Badge>
@@ -894,7 +894,7 @@ export default function MemoryGraphPanel() {
                                     <span className="text-muted-foreground">
                                       {dir}
                                     </span>
-                                    <span className="text-[color:var(--aeon-core)]">
+                                    <span className="text-[color:var(--a_core)]">
                                       {e.relation}
                                     </span>
                                     <span className="text-muted-foreground">
@@ -902,7 +902,7 @@ export default function MemoryGraphPanel() {
                                     </span>
                                     <button
                                       onClick={() => setSelectedId(otherId)}
-                                      className="truncate text-foreground transition-colors hover:text-[color:var(--aeon-active)]"
+                                      className="truncate text-foreground transition-colors hover:text-[color:var(--a_active)]"
                                     >
                                       {other?.label ?? otherId.slice(0, 6)}
                                     </button>
@@ -994,7 +994,7 @@ export default function MemoryGraphPanel() {
                     disabled={adding || !newLabel.trim()}
                     className="w-full font-mono text-xs tracking-widest"
                     style={{
-                      background: "var(--aeon-core)",
+                      background: "var(--a_core)",
                       color: "var(--background)",
                     }}
                   >
@@ -1024,7 +1024,7 @@ export default function MemoryGraphPanel() {
                 >
                   <div className="space-y-2 border-b border-border/40 p-3">
                     <label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      <Sparkles className="h-3 w-3 text-[color:var(--aeon-active)]" />
+                      <Sparkles className="h-3 w-3 text-[color:var(--a_active)]" />
                       Semantic Recall
                     </label>
                     <div className="flex gap-2">
@@ -1062,7 +1062,7 @@ export default function MemoryGraphPanel() {
                       disabled={searching || !query.trim()}
                       className="w-full font-mono text-xs tracking-widest"
                       style={{
-                        background: "var(--aeon-active)",
+                        background: "var(--a_active)",
                         color: "var(--background)",
                       }}
                     >
@@ -1157,9 +1157,9 @@ function RecallResult({ mem }: { mem: MemoryView }) {
             variant="outline"
             className="h-4 px-1 font-mono text-[8px] uppercase"
             style={{
-              color: "var(--aeon-active)",
+              color: "var(--a_active)",
               borderColor:
-                "color-mix(in oklch, var(--aeon-active) 30%, transparent)",
+                "color-mix(in oklch, var(--a_active) 30%, transparent)",
             }}
           >
             {mem.kind}
@@ -1185,14 +1185,14 @@ function RecallResult({ mem }: { mem: MemoryView }) {
             style={{
               width: `${score * 100}%`,
               background:
-                "linear-gradient(90deg, var(--aeon-active), var(--aeon-core))",
-              boxShadow: "0 0 6px var(--aeon-active)",
+                "linear-gradient(90deg, var(--a_active), var(--a_core))",
+              boxShadow: "0 0 6px var(--a_active)",
             }}
           />
         </div>
         <span
           className="font-mono text-[9px] tabular-nums"
-          style={{ color: "var(--aeon-active)" }}
+          style={{ color: "var(--a_active)" }}
         >
           {(score * 100).toFixed(0)}%
         </span>

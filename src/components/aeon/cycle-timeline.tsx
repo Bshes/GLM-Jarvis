@@ -24,25 +24,25 @@ import { Badge } from "@/components/ui/badge";
 import { useEffect, useMemo, useState } from "react";
 
 const OUTCOME_COLOR: Record<string, string> = {
-  executed: "var(--aeon-active)",
-  "awaiting-confirmation": "var(--aeon-warn)",
-  advisory: "var(--aeon-danger)",
+  executed: "var(--a_active)",
+  "awaiting-confirmation": "var(--a_warn)",
+  advisory: "var(--a_danger)",
 };
 
 type RouteFilter = "all" | "local" | "cloud";
 type OutcomeFilter = "all" | "executed" | "awaiting-confirmation" | "advisory";
 
 const ROUTE_CHIPS: { value: RouteFilter; label: string; color: string }[] = [
-  { value: "all", label: "All", color: "var(--aeon-core)" },
-  { value: "local", label: "Local", color: "var(--aeon-core)" },
-  { value: "cloud", label: "Cloud", color: "var(--aeon-core)" },
+  { value: "all", label: "All", color: "var(--a_core)" },
+  { value: "local", label: "Local", color: "var(--a_core)" },
+  { value: "cloud", label: "Cloud", color: "var(--a_core)" },
 ];
 
 const OUTCOME_CHIPS: { value: OutcomeFilter; label: string; color: string }[] = [
-  { value: "all", label: "All", color: "var(--aeon-core)" },
-  { value: "executed", label: "Executed", color: "var(--aeon-active)" },
-  { value: "awaiting-confirmation", label: "Awaiting", color: "var(--aeon-warn)" },
-  { value: "advisory", label: "Advisory", color: "var(--aeon-danger)" },
+  { value: "all", label: "All", color: "var(--a_core)" },
+  { value: "executed", label: "Executed", color: "var(--a_active)" },
+  { value: "awaiting-confirmation", label: "Awaiting", color: "var(--a_warn)" },
+  { value: "advisory", label: "Advisory", color: "var(--a_danger)" },
 ];
 
 export function CycleTimeline() {
@@ -86,9 +86,9 @@ export function CycleTimeline() {
   return (
     <div className="rounded-lg border border-border bg-card/40 p-3">
       <div className="mb-2 flex items-center gap-2">
-        <History className="h-3.5 w-3.5 text-[var(--aeon-core)]" />
+        <History className="h-3.5 w-3.5 text-[oklch(0.82_0.15_75)]" />
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground">cycle history</span>
-        <span className="font-mono text-[10px] text-[var(--aeon-core)]">{cycles.length}</span>
+        <span className="font-mono text-[10px] text-[oklch(0.82_0.15_75)]">{cycles.length}</span>
         <Button size="sm" variant="ghost" onClick={() => void refreshCycles()} className="ml-auto h-6 px-2 text-[10px] text-muted-foreground">
           <Activity className="mr-1 h-3 w-3" /> Sync
         </Button>
@@ -142,7 +142,7 @@ export function CycleTimeline() {
                   <div className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
                     <span className="truncate font-mono text-[10px] text-muted-foreground">{c.cycleId}</span>
-                    <span className="ml-auto font-mono text-[9px]" style={{ color: c.route === "cloud" ? "var(--aeon-core)" : "var(--aeon-active)" }}>
+                    <span className="ml-auto font-mono text-[9px]" style={{ color: c.route === "cloud" ? "var(--a_core)" : "var(--a_active)" }}>
                       {c.route === "cloud" ? "CLOUD" : "LOCAL"}
                     </span>
                   </div>
@@ -165,7 +165,7 @@ export function CycleTimeline() {
                       className="h-full rounded-full"
                       style={{
                         width: `${Math.round(c.complexity * 100)}%`,
-                        background: c.route === "cloud" ? "var(--aeon-core)" : "var(--aeon-active)",
+                        background: c.route === "cloud" ? "var(--a_core)" : "var(--a_active)",
                       }}
                     />
                   </div>
@@ -239,7 +239,7 @@ function FilterBar({
 
         <div className="ml-auto flex items-center gap-2">
           <span className="font-mono text-[10px] text-muted-foreground">
-            <span className="text-[var(--aeon-core)]">{resultCount}</span> of {total} cycles
+            <span className="text-[oklch(0.82_0.15_75)]">{resultCount}</span> of {total} cycles
           </span>
           {hasFilters && (
             <Button
@@ -332,26 +332,26 @@ function CycleDetail() {
               <Field label="INPUT" color="var(--foreground)" icon={ChevronRight}>
                 <p className="text-xs text-foreground/90">{selected.input}</p>
               </Field>
-              <Field label="ROUTING" color="var(--aeon-active)" icon={Cpu}>
+              <Field label="ROUTING" color="var(--a_active)" icon={Cpu}>
                 <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-                  <Badge variant="outline" className="border-border/60 font-mono text-[9px]" style={{ color: selected.route === "cloud" ? "var(--aeon-core)" : "var(--aeon-active)" }}>
+                  <Badge variant="outline" className="border-border/60 font-mono text-[9px]" style={{ color: selected.route === "cloud" ? "var(--a_core)" : "var(--a_active)" }}>
                     {selected.model}
                   </Badge>
                   <span className="font-mono text-muted-foreground">complexity {selected.complexity.toFixed(2)}</span>
-                  {selected.thinking && <Badge variant="outline" className="border-[var(--aeon-think)]/40 font-mono text-[9px] text-[var(--aeon-think)]">THINKING</Badge>}
+                  {selected.thinking && <Badge variant="outline" className="border-[oklch(0.82_0.15_75)]/40 font-mono text-[9px] text-[oklch(0.82_0.15_75)]">THINKING</Badge>}
                   <span className="font-mono text-muted-foreground">· {selected.durationMs}ms</span>
                 </div>
               </Field>
-              <Field label="PERCEIVE" color="var(--aeon-perceive)" icon={Activity}>
+              <Field label="PERCEIVE" color="var(--a_perceive)" icon={Activity}>
                 <p className="text-xs leading-relaxed text-foreground/80">{selected.perception}</p>
               </Field>
-              <Field label="THINK" color="var(--aeon-think)" icon={Brain}>
+              <Field label="THINK" color="var(--a_think)" icon={Brain}>
                 <p className="text-xs leading-relaxed text-foreground/80">{selected.thought}</p>
               </Field>
-              <Field label="REFLECT" color="var(--aeon-reflect)" icon={Zap}>
+              <Field label="REFLECT" color="var(--a_reflect)" icon={Zap}>
                 <p className="text-xs leading-relaxed text-foreground/80">{selected.reflection}</p>
               </Field>
-              <Field label="METRICS" color="var(--aeon-core)" icon={Clock}>
+              <Field label="METRICS" color="var(--a_core)" icon={Clock}>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <Metric label="DURATION" value={`${(selected.durationMs / 1000).toFixed(1)}s`} />
                   <Metric label="ACTIONS" value={String(selected.actionCount)} />

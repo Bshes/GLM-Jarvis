@@ -4,7 +4,7 @@
  *
  * Replaces the left sidebar nav on screens below `md` (768px). Renders a
  * horizontally-scrollable rail of 9 icon+label buttons (one per A.E.O.N.
- * view). The active button pulses softly, glows amber (var(--aeon-core)),
+ * view). The active button pulses softly, glows amber (var(--a_core)),
  * and carries a top accent line. Inactive buttons are muted.
  *
  * Hidden on desktop where AeonShell's left sidebar takes over.
@@ -84,7 +84,7 @@ export function MobileBottomNav() {
             aria-current={active ? "page" : undefined}
             className={`relative flex h-14 w-[4.25rem] shrink-0 flex-col items-center justify-center gap-1 transition-colors ${
               active
-                ? "text-[var(--aeon-core)]"
+                ? "text-[oklch(0.82_0.15_75)]"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -92,8 +92,8 @@ export function MobileBottomNav() {
             {active && (
               <motion.span
                 layoutId="mobile-nav-active"
-                className="absolute left-2.5 right-2.5 top-0 h-0.5 rounded-full bg-[var(--aeon-core)]"
-                style={{ boxShadow: "0 0 8px var(--aeon-core)" }}
+                className="absolute left-2.5 right-2.5 top-0 h-0.5 rounded-full bg-[oklch(0.82_0.15_75)]"
+                style={{ boxShadow: "0 0 8px var(--a_core)" }}
               />
             )}
 
@@ -104,9 +104,9 @@ export function MobileBottomNav() {
               style={
                 active
                   ? {
-                      color: "var(--aeon-core)",
+                      color: "var(--a_core)",
                       filter:
-                        "drop-shadow(0 0 4px color-mix(in oklch, var(--aeon-core) 60%, transparent))",
+                        "drop-shadow(0 0 4px color-mix(in oklch, var(--a_core) 60%, transparent))",
                     }
                   : undefined
               }

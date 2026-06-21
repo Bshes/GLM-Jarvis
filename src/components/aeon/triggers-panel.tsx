@@ -83,10 +83,10 @@ const CHANNEL_META: Record<
   Channel,
   { color: string; icon: LucideIcon; label: string }
 > = {
-  biometric: { color: "var(--aeon-danger)", icon: HeartPulse, label: "BIO" },
-  vision: { color: "var(--aeon-active)", icon: Eye, label: "VIS" },
-  audio: { color: "var(--aeon-core)", icon: Ear, label: "AUD" },
-  time: { color: "var(--aeon-warn)", icon: Clock, label: "TIME" },
+  biometric: { color: "var(--a_danger)", icon: HeartPulse, label: "BIO" },
+  vision: { color: "var(--a_active)", icon: Eye, label: "VIS" },
+  audio: { color: "var(--a_core)", icon: Ear, label: "AUD" },
+  time: { color: "var(--a_warn)", icon: Clock, label: "TIME" },
   system: { color: "var(--muted-foreground)", icon: Cpu, label: "SYS" },
 };
 
@@ -154,16 +154,16 @@ function severityColor(severity: string): string {
   switch (severity) {
     case "critical":
     case "error":
-      return "var(--aeon-danger)";
+      return "var(--a_danger)";
     case "warn":
     case "warning":
-      return "var(--aeon-warn)";
+      return "var(--a_warn)";
     case "info":
-      return "var(--aeon-core)";
+      return "var(--a_core)";
     case "debug":
       return "var(--muted-foreground)";
     default:
-      return "var(--aeon-active)";
+      return "var(--a_active)";
   }
 }
 
@@ -273,7 +273,7 @@ function TriggerCard({
         )}
         style={{
           boxShadow: recentlyFired
-            ? `0 0 0 1px color-mix(in oklch, var(--aeon-active) 60%, transparent), 0 0 18px 2px color-mix(in oklch, var(--aeon-active) 35%, transparent)`
+            ? `0 0 0 1px color-mix(in oklch, var(--a_active) 60%, transparent), 0 0 18px 2px color-mix(in oklch, var(--a_active) 35%, transparent)`
             : `inset 0 0 0 1px color-mix(in oklch, ${channelColor} 18%, transparent)`,
         }}
       >
@@ -308,7 +308,7 @@ function TriggerCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="size-7 text-muted-foreground hover:text-[var(--aeon-danger)]"
+                className="size-7 text-muted-foreground hover:text-[oklch(0.64_0.21_18)]"
                 disabled={busy}
                 onClick={() => onDelete(trigger)}
                 aria-label="Delete trigger"
@@ -343,8 +343,8 @@ function TriggerCard({
             <span
               className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-sm"
               style={{
-                color: "var(--aeon-core)",
-                background: "color-mix(in oklch, var(--aeon-core) 14%, transparent)",
+                color: "var(--a_core)",
+                background: "color-mix(in oklch, var(--a_core) 14%, transparent)",
               }}
             >
               <AgentGlyph name={trigger.agentName} className="size-3.5" />
@@ -363,7 +363,7 @@ function TriggerCard({
           <div className="flex items-center justify-between gap-2 pt-1">
             <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
               <span className="inline-flex items-center gap-1">
-                <Zap className="size-3" style={{ color: "var(--aeon-warn)" }} />
+                <Zap className="size-3" style={{ color: "var(--a_warn)" }} />
                 <span className="tabular-nums">{trigger.fireCount}</span> fires
               </span>
               <Separator orientation="vertical" className="h-3" />
@@ -462,7 +462,7 @@ function CreateTriggerDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto aeon-scroll sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 font-mono tracking-wide">
-            <Plus className="size-4" style={{ color: "var(--aeon-core)" }} />
+            <Plus className="size-4" style={{ color: "var(--a_core)" }} />
             ARM NEW TRIGGER
           </DialogTitle>
           <DialogDescription>
@@ -636,9 +636,9 @@ function CreateTriggerDialog({
         <div
           className="flex items-center gap-2 rounded-md px-3 py-2 font-mono text-xs"
           style={{
-            background: "color-mix(in oklch, var(--aeon-core) 8%, transparent)",
-            boxShadow: "inset 0 0 0 1px color-mix(in oklch, var(--aeon-core) 25%, transparent)",
-            color: "var(--aeon-core)",
+            background: "color-mix(in oklch, var(--a_core) 8%, transparent)",
+            boxShadow: "inset 0 0 0 1px color-mix(in oklch, var(--a_core) 25%, transparent)",
+            color: "var(--a_core)",
           }}
         >
           <span className="text-[9px] uppercase tracking-widest text-muted-foreground">
@@ -864,11 +864,11 @@ function SensoryFeed({ events }: { events: SensoryEventView[] }) {
     <Card className="gap-0 overflow-hidden py-0">
       <div
         className="h-0.5 w-full"
-        style={{ background: "var(--aeon-active)", opacity: 0.7 }}
+        style={{ background: "var(--a_active)", opacity: 0.7 }}
       />
       <CardHeader className="gap-1 px-4 pt-4 pb-2">
         <CardTitle className="flex items-center gap-2 font-mono text-sm tracking-wide">
-          <Activity className="size-4" style={{ color: "var(--aeon-active)" }} />
+          <Activity className="size-4" style={{ color: "var(--a_active)" }} />
           SENSORY FEED
         </CardTitle>
         <CardDescription className="text-xs">
@@ -1055,10 +1055,10 @@ export default function TriggersPanel() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <Zap className="size-5" style={{ color: "var(--aeon-core)" }} />
+            <Zap className="size-5" style={{ color: "var(--a_core)" }} />
             <h2
               className="font-mono text-lg font-bold tracking-widest uppercase"
-              style={{ color: "var(--aeon-core)" }}
+              style={{ color: "var(--a_core)" }}
             >
               Anticipatory Triggers
             </h2>
@@ -1086,7 +1086,7 @@ export default function TriggersPanel() {
             {evaluating ? (
               <Loader2 className="size-3.5 animate-spin" />
             ) : (
-              <Play className="size-3.5" style={{ color: "var(--aeon-active)" }} />
+              <Play className="size-3.5" style={{ color: "var(--a_active)" }} />
             )}
             Run anticipatory check
           </Button>
@@ -1103,10 +1103,10 @@ export default function TriggersPanel() {
 
       {/* stat row */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <StatTile label="Triggers" value={stats.total} color="var(--aeon-core)" />
-        <StatTile label="Armed" value={stats.armed} color="var(--aeon-active)" />
-        <StatTile label="Fired" value={stats.fired} color="var(--aeon-warn)" />
-        <StatTile label="Last 1h" value={stats.firedLastHour} color="var(--aeon-danger)" />
+        <StatTile label="Triggers" value={stats.total} color="var(--a_core)" />
+        <StatTile label="Armed" value={stats.armed} color="var(--a_active)" />
+        <StatTile label="Fired" value={stats.fired} color="var(--a_warn)" />
+        <StatTile label="Last 1h" value={stats.firedLastHour} color="var(--a_danger)" />
       </div>
 
       {/* main grid */}
