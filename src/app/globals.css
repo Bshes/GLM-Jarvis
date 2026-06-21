@@ -1,0 +1,247 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-aeon-core: var(--aeon-core);
+  --color-aeon-active: var(--aeon-active);
+  --color-aeon-warn: var(--aeon-warn);
+  --color-aeon-danger: var(--aeon-danger);
+  --color-aeon-perceive: var(--aeon-perceive);
+  --color-aeon-think: var(--aeon-think);
+  --color-aeon-act: var(--aeon-act);
+  --color-aeon-reflect: var(--aeon-reflect);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+  A.E.O.N. — Autonomous Entity for Orchestration & Navigation
+  Dark "operating system" HUD aesthetic. Warm amber core, emerald active,
+  rose danger. No indigo/blue primaries.
+*/
+:root {
+  --radius: 0.5rem;
+
+  /* Base surface — deep warm near-black */
+  --background: oklch(0.13 0.006 70);
+  --foreground: oklch(0.96 0.008 80);
+
+  --card: oklch(0.16 0.007 70);
+  --card-foreground: oklch(0.96 0.008 80);
+
+  --popover: oklch(0.18 0.008 70);
+  --popover-foreground: oklch(0.96 0.008 80);
+
+  --primary: oklch(0.80 0.15 75);
+  --primary-foreground: oklch(0.16 0.02 70);
+
+  --secondary: oklch(0.22 0.008 70);
+  --secondary-foreground: oklch(0.92 0.01 80);
+
+  --muted: oklch(0.20 0.007 70);
+  --muted-foreground: oklch(0.62 0.012 75);
+
+  --accent: oklch(0.26 0.02 75);
+  --accent-foreground: oklch(0.95 0.01 80);
+
+  --destructive: oklch(0.64 0.21 18);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.80 0.15 75 / 60%);
+
+  /* A.E.O.N. semantic palette */
+  --aeon-core: oklch(0.82 0.15 75);        /* amber gold — the core */
+  --aeon-active: oklch(0.74 0.16 158);     /* emerald — online/active/tier1 */
+  --aeon-warn: oklch(0.72 0.18 55);        /* orange — tier2 / caution */
+  --aeon-danger: oklch(0.64 0.21 18);      /* rose — tier3 / alert */
+
+  /* Cognitive loop phases */
+  --aeon-perceive: oklch(0.74 0.16 158);   /* emerald */
+  --aeon-think: oklch(0.82 0.15 75);       /* amber */
+  --aeon-act: oklch(0.72 0.18 55);         /* orange */
+  --aeon-reflect: oklch(0.66 0.16 350);    /* rose-plum */
+
+  --chart-1: oklch(0.82 0.15 75);
+  --chart-2: oklch(0.74 0.16 158);
+  --chart-3: oklch(0.72 0.18 55);
+  --chart-4: oklch(0.66 0.16 350);
+  --chart-5: oklch(0.70 0.10 95);
+
+  --sidebar: oklch(0.15 0.006 70);
+  --sidebar-foreground: oklch(0.92 0.01 80);
+  --sidebar-primary: oklch(0.80 0.15 75);
+  --sidebar-primary-foreground: oklch(0.16 0.02 70);
+  --sidebar-accent: oklch(0.22 0.008 70);
+  --sidebar-accent-foreground: oklch(0.95 0.01 80);
+  --sidebar-border: oklch(1 0 0 / 7%);
+  --sidebar-ring: oklch(0.80 0.15 75 / 60%);
+}
+
+.dark {
+  /* The OS is always dark — keep parity with :root */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv01", "cv03";
+  }
+}
+
+/* ---------- A.E.O.N. utilities ---------- */
+@layer utilities {
+  .font-mono {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+  }
+
+  /* HUD grid backdrop */
+  .aeon-grid-bg {
+    background-image:
+      linear-gradient(to right, oklch(1 0 0 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 0.035) 1px, transparent 1px);
+    background-size: 38px 38px;
+  }
+  .aeon-radial-bg {
+    background:
+      radial-gradient(circle at 50% 0%, oklch(0.82 0.15 75 / 0.10), transparent 55%),
+      radial-gradient(circle at 100% 100%, oklch(0.74 0.16 158 / 0.07), transparent 50%);
+  }
+
+  .aeon-glow-core {
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.15 75 / 0.35),
+      0 0 24px 2px oklch(0.82 0.15 75 / 0.35),
+      0 0 70px 8px oklch(0.82 0.15 75 / 0.18);
+  }
+  .aeon-glow-active {
+    box-shadow: 0 0 0 1px oklch(0.74 0.16 158 / 0.4), 0 0 18px 1px oklch(0.74 0.16 158 / 0.3);
+  }
+  .aeon-text-glow {
+    text-shadow: 0 0 12px oklch(0.82 0.15 75 / 0.55);
+  }
+
+  .aeon-scanline {
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      oklch(0.82 0.15 75 / 0.025) 3px,
+      transparent 4px
+    );
+  }
+
+  /* Custom scrollbars */
+  .aeon-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.82 0.15 75 / 0.35) transparent;
+  }
+  .aeon-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .aeon-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .aeon-scroll::-webkit-scrollbar-thumb {
+    background: oklch(0.82 0.15 75 / 0.28);
+    border-radius: 999px;
+  }
+  .aeon-scroll::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.82 0.15 75 / 0.5);
+  }
+
+  .aeon-clip-corner {
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+}
+
+/* ---------- Animations ---------- */
+@keyframes aeon-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.97); }
+}
+@keyframes aeon-ring {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes aeon-spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes aeon-spin-rev {
+  to { transform: rotate(-360deg); }
+}
+@keyframes aeon-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+@keyframes aeon-flicker {
+  0%, 100% { opacity: 0.9; }
+  47% { opacity: 0.9; }
+  48% { opacity: 0.5; }
+  49% { opacity: 0.9; }
+  72% { opacity: 0.9; }
+  73% { opacity: 0.65; }
+  74% { opacity: 0.9; }
+}
+@keyframes aeon-stream {
+  0% { transform: translateY(6px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes aeon-dash {
+  to { stroke-dashoffset: -1000; }
+}
+@keyframes aeon-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-aeon-pulse { animation: aeon-pulse 2.4s ease-in-out infinite; }
+.animate-aeon-spin-slow { animation: aeon-spin-slow 18s linear infinite; }
+.animate-aeon-spin-rev { animation: aeon-spin-rev 26s linear infinite; }
+.animate-aeon-blink { animation: aeon-blink 1.1s step-end infinite; }
+.animate-aeon-flicker { animation: aeon-flicker 5s linear infinite; }
+.animate-aeon-stream { animation: aeon-stream 0.32s ease-out; }
+.animate-aeon-dash { stroke-dasharray: 6 10; animation: aeon-dash 30s linear infinite; }

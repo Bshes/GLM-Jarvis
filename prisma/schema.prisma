@@ -1,0 +1,152 @@
+// A.E.O.N. — Autonomous Entity for Orchestration & Navigation
+// Data model: graph memory, vector memory, agents, actions, logs, sensory events,
+// anticipatory triggers, and simulated IoT devices.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Graph memory node — entities, concepts, people, devices, events.
+model GraphNode {
+  id        String   @id @default(cuid())
+  label     String
+  kind      String // entity | concept | person | place | event | device | agent
+  summary   String?
+  metadata  String? // JSON string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  edgesFrom Edge[] @relation("EdgeFrom")
+  edgesTo   Edge[] @relation("EdgeTo")
+
+  @@index([kind])
+}
+
+/// Directed relationship between graph nodes.
+model Edge {
+  id        String   @id @default(cuid())
+  fromId    String
+  toId      String
+  relation  String // controls | knows | located_in | depends_on | created | observes
+  weight    Float    @default(1)
+  createdAt DateTime @default(now())
+
+  from GraphNode @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   GraphNode @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@index([fromId])
+  @@index([toId])
+  @@index([relation])
+}
+
+/// Episodic / semantic / procedural memory with a lightweight embedding vector.
+model Memory {
+  id         String   @id @default(cuid())
+  content    String
+  kind       String // episodic | semantic | procedural
+  tags       String? // comma separated
+  embedding  String? // JSON number[] — hashed bag-of-words vector
+  source     String? // agent name | "user" | "orchestrator"
+  importance Float    @default(0.5)
+  createdAt  DateTime @default(now())
+
+  @@index([kind])
+}
+
+/// A registered sub-agent in the A.E.O.N. collective.
+model Agent {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  role        String
+  description String?
+  status      String    @default("idle") // idle | busy | error | offline
+  color       String    @default("amber")
+  icon        String?
+  tier        Int       @default(1)
+  model       String    @default("local")
+  tasksDone   Int       @default(0)
+  lastTask    String?
+  lastActive  DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+/// A proposed or executed real-world action, governed by safety tiers.
+model Action {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  agentName   String
+  tier        Int // 1 autonomous | 2 confirmative | 3 advisory
+  status      String    @default("pending") // pending | approved | denied | executed | failed | advisory
+  payload     String? // JSON
+  result      String?
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@index([status])
+  @@index([tier])
+}
+
+/// Append-only structured system log.
+model LogEntry {
+  id        String   @id @default(cuid())
+  level     String // DEBUG | INFO | WARN | ERROR
+  source    String // orchestrator | router | memory | agent:coder | ...
+  phase     String? // PERCEIVE | THINK | ACT | REFLECT
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([level])
+}
+
+/// Inbound sensory observations (audio, biometric, vision, text, system).
+model SensoryEvent {
+  id        String   @id @default(cuid())
+  channel   String // audio | biometric | vision | text | system
+  value     String // JSON payload
+  severity  String   @default("info") // info | warn | critical
+  createdAt DateTime @default(now())
+
+  @@index([channel])
+  @@index([createdAt])
+}
+
+/// Anticipatory trigger — fires a sub-agent workflow when a condition is met.
+model Trigger {
+  id         String    @id @default(cuid())
+  name       String
+  channel    String // biometric | vision | audio | time | system
+  metric     String // heart_rate | sleep_hours | posture | noise | hour | ...
+  operator   String // gt | lt | eq | between
+  threshold  String // JSON threshold value(s)
+  agentName  String
+  action     String
+  tier       Int      @default(2)
+  enabled    Boolean   @default(true)
+  lastFired  DateTime?
+  fireCount  Int      @default(0)
+  createdAt  DateTime  @default(now())
+}
+
+/// Simulated smart-home / IoT device.
+model Device {
+  id      String  @id @default(cuid())
+  name    String
+  room    String
+  type    String // light | thermostat | lock | camera | speaker | plug | blinds
+  state   String // JSON: { on, brightness, temp, locked, ... }
+  online  Boolean @default(true)
+}
+
+/// Key/value runtime settings.
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}

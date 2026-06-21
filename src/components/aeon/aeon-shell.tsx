@@ -1,0 +1,265 @@
+"use client";
+/**
+ * AeonShell — the A.E.O.N. operating-system chrome.
+ * Top status bar, left navigation rail, view router, sticky footer, and the
+ * global sonner toast viewport. Mounts the live stream hook.
+ */
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import {
+  Brain, Cpu, Activity, Radar, ShieldCheck, Terminal, Zap, House,
+  Wifi, WifiOff, Radio, ChevronRight,
+} from "lucide-react";
+import { useAeon, type View } from "@/lib/store";
+import { useAeonStream } from "@/hooks/use-aeon-stream";
+import { LOOP_PHASES, PHASE_META } from "@/lib/aeon";
+import { clockString } from "@/components/aeon/ui";
+
+import { CoreView } from "@/components/aeon/core-view";
+import { AgentsPanel } from "@/components/aeon/agents-panel";
+import MemoryGraphPanel from "@/components/aeon/memory-graph-panel";
+import { SensoryPanel } from "@/components/aeon/sensory-panel";
+import { ActionsPanel } from "@/components/aeon/actions-panel";
+import { LogsTerminal } from "@/components/aeon/logs-terminal";
+import TriggersPanel from "@/components/aeon/triggers-panel";
+import { IoTPanel } from "@/components/aeon/iot-panel";
+
+const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
+  { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
+  { id: "agents", label: "Agents", icon: Cpu, desc: "Sub-agent collective" },
+  { id: "memory", label: "Memory", icon: Activity, desc: "Graph + vector" },
+  { id: "sensory", label: "Sensory", icon: Radar, desc: "Multimodal I/O" },
+  { id: "actions", label: "Actions", icon: ShieldCheck, desc: "Tiered queue" },
+  { id: "triggers", label: "Triggers", icon: Zap, desc: "Anticipatory" },
+  { id: "iot", label: "IoT", icon: House, desc: "Smart home" },
+  { id: "logs", label: "Logs", icon: Terminal, desc: "Observability" },
+];
+
+export function AeonShell() {
+  useAeonStream();
+  const view = useAeon((s) => s.view);
+  const setView = useAeon((s) => s.setView);
+  const connected = useAeon((s) => s.connected);
+  const orchestrating = useAeon((s) => s.orchestrating);
+  const phase = useAeon((s) => s.phase);
+  const pendingActions = useAeon((s) => s.pendingActions);
+  const memoryCount = useAeon((s) => s.memoryCount);
+  const stream = useAeon((s) => s.stream);
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const latest = stream[0];
+  const activeAgents = useAeon((s) => s.agents.length);
+
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      {/* ===== Header / status bar ===== */}
+      <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
+        <div className="flex h-14 items-center gap-3 px-3 md:px-5">
+          {/* logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex h-8 w-8 items-center justify-center">
+              <svg viewBox="0 0 40 40" className="h-8 w-8">
+                <polygon points={hexPoints(20, 20, 16)} fill="none" stroke="var(--aeon-core)" strokeWidth="1.5" className="aeon-glow-core" />
+                <circle cx="20" cy="20" r="3.5" fill="var(--aeon-core)" className="animate-aeon-pulse" />
+                <g style={{ transformOrigin: "center", animation: "aeon-spin-slow 16s linear infinite" }}>
+                  <circle cx="20" cy="20" r="18" fill="none" stroke="var(--aeon-core)" strokeOpacity="0.3" strokeWidth="0.75" strokeDasharray="2 4" />
+                </g>
+              </svg>
+            </div>
+            <div className="leading-none">
+              <div className="font-mono text-sm font-bold tracking-[0.2em] text-[var(--aeon-core)] aeon-text-glow">A.E.O.N.</div>
+              <div className="hidden text-[9px] uppercase tracking-widest text-muted-foreground sm:block">autonomous entity · orchestration & navigation</div>
+            </div>
+          </div>
+
+          {/* status pills */}
+          <div className="ml-2 hidden items-center gap-1.5 md:flex">
+            {LOOP_PHASES.map((p) => (
+              <span
+                key={p}
+                className="inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-wider transition-all"
+                style={{
+                  color: phase === p ? PHASE_META[p].color : "var(--muted-foreground)",
+                  background: phase === p ? `color-mix(in oklch, ${PHASE_META[p].color} 16%, transparent)` : "transparent",
+                  boxShadow: phase === p ? `0 0 8px color-mix(in oklch, ${PHASE_META[p].color} 40%, transparent)` : "none",
+                }}
+              >
+                <span className="h-1 w-1 rounded-full" style={{ background: phase === p ? PHASE_META[p].color : "var(--muted-foreground)", opacity: phase === p ? 1 : 0.4 }} />
+                {p.slice(0, 4)}
+              </span>
+            ))}
+          </div>
+
+          <div className="ml-auto flex items-center gap-2 md:gap-3">
+            {/* live stats */}
+            <div className="hidden items-center gap-3 lg:flex">
+              <HeaderStat icon={Cpu} label="AGENTS" value={String(activeAgents)} color="var(--aeon-active)" />
+              <HeaderStat icon={Activity} label="MEMORY" value={String(memoryCount)} color="var(--aeon-core)" />
+              <HeaderStat icon={ShieldCheck} label="PENDING" value={String(pendingActions)} color={pendingActions > 0 ? "var(--aeon-warn)" : "var(--muted-foreground)"} />
+            </div>
+
+            {/* connection */}
+            <div className="flex items-center gap-1.5 rounded-sm border border-border/60 bg-background/40 px-2 py-1">
+              {connected ? <Wifi className="h-3 w-3 text-[var(--aeon-active)]" /> : <WifiOff className="h-3 w-3 text-[var(--aeon-danger)]" />}
+              <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: connected ? "var(--aeon-active)" : "var(--aeon-danger)" }}>
+                {connected ? "LINK" : "OFFLINE"}
+              </span>
+              {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[var(--aeon-core)]" />}
+            </div>
+
+            {/* clock */}
+            <div className="hidden font-mono text-sm tabular-nums text-foreground sm:block">
+              {clockString(now)}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ===== Body ===== */}
+      <div className="flex min-h-0 flex-1">
+        {/* sidebar nav */}
+        <nav className="sticky top-14 z-20 flex h-[calc(100vh-3.5rem)] w-16 shrink-0 flex-col border-r border-border bg-background/60 py-3 md:w-52">
+          {NAV.map((item) => {
+            const active = view === item.id;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setView(item.id)}
+                className={`group relative flex items-center gap-3 px-3 py-2.5 text-left transition ${
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="nav-active"
+                    className="absolute left-0 top-1/2 h-7 w-0.5 -translate-y-1/2 rounded-full bg-[var(--aeon-core)]"
+                    style={{ boxShadow: "0 0 8px var(--aeon-core)" }}
+                  />
+                )}
+                <Icon className={`h-4 w-4 shrink-0 transition ${active ? "text-[var(--aeon-core)]" : ""}`} />
+                <span className="hidden font-mono text-xs font-medium uppercase tracking-wider md:inline">{item.label}</span>
+                {active && <ChevronRight className="ml-auto hidden h-3 w-3 md:inline" />}
+              </button>
+            );
+          })}
+
+          <div className="mt-auto hidden px-3 py-2 md:block">
+            <div className="rounded-md border border-border/40 bg-background/30 p-2">
+              <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> system nominal
+              </div>
+              <div className="mt-1 font-mono text-[9px] text-muted-foreground">core v1.0 · uptime ∞</div>
+            </div>
+          </div>
+        </nav>
+
+        {/* main view */}
+        <main className="aeon-scroll min-h-0 flex-1 overflow-y-auto p-3 md:p-5">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={view}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+              className="mx-auto flex min-h-[calc(100vh-7.5rem)] max-w-[1500px] flex-col"
+            >
+              <ViewHeader view={view} />
+              <div className="min-h-0 flex-1">
+                {view === "core" && <CoreView />}
+                {view === "agents" && <AgentsPanel />}
+                {view === "memory" && <MemoryGraphPanel />}
+                {view === "sensory" && <SensoryPanel />}
+                {view === "actions" && <ActionsPanel />}
+                {view === "triggers" && <TriggersPanel />}
+                {view === "iot" && <IoTPanel />}
+                {view === "logs" && <LogsTerminal />}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+
+      {/* ===== Sticky footer ===== */}
+      <footer className="mt-auto border-t border-border bg-background/85 backdrop-blur-md">
+        <div className="flex h-9 items-center gap-3 px-3 md:px-5">
+          <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-[var(--aeon-active)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--aeon-active)] animate-aeon-pulse" /> stream
+          </span>
+          <div className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted-foreground">
+            {latest ? (
+              <span>
+                <span className="text-[var(--aeon-core)]">[{latest.type.toUpperCase()}]</span> {latest.message ?? JSON.stringify(latest.data ?? "")}
+              </span>
+            ) : (
+              <span className="text-muted-foreground/60">awaiting events…</span>
+            )}
+          </div>
+          <span className="hidden font-mono text-[10px] text-muted-foreground sm:inline">
+            {stream.length} buffered
+          </span>
+          <span className="font-mono text-[10px] text-muted-foreground">·</span>
+          <span className="font-mono text-[10px] text-muted-foreground">A.E.O.N. CORE</span>
+        </div>
+      </footer>
+
+      {/* global sonner viewport */}
+      <SonnerToaster
+        position="bottom-right"
+        richColors
+        closeButton
+        toastOptions={{
+          style: {
+            background: "var(--popover)",
+            color: "var(--popover-foreground)",
+            border: "1px solid var(--border)",
+            fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+            fontSize: "12px",
+          },
+        }}
+      />
+    </div>
+  );
+}
+
+function ViewHeader({ view }: { view: View }) {
+  const item = NAV.find((n) => n.id === view)!;
+  const Icon = item.icon;
+  return (
+    <div className="mb-4 flex items-center gap-2.5">
+      <div className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card/40">
+        <Icon className="h-4 w-4 text-[var(--aeon-core)]" />
+      </div>
+      <div>
+        <h1 className="font-mono text-base font-bold tracking-wide text-foreground">{item.label.toUpperCase()}</h1>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{item.desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function HeaderStat({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <Icon className="h-3 w-3" style={{ color }} />
+      <span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
+      <span className="font-mono text-xs font-bold tabular-nums" style={{ color }}>{value}</span>
+    </div>
+  );
+}
+
+function hexPoints(cx: number, cy: number, r: number): string {
+  const pts: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
+  }
+  return pts.join(" ");
+}
