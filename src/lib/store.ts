@@ -72,6 +72,20 @@ export interface ChatTurnView {
   createdAt: string;
 }
 
+export type AgentMessageKind = "delegate" | "status" | "result" | "query" | "response";
+
+/** A row on the inter-agent collaboration bus. */
+export interface AgentMessageView {
+  id: string;
+  fromAgent: string;
+  toAgent: string; // specific agent name, or "broadcast"
+  kind: AgentMessageKind;
+  subject: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
 const STREAM_CAP = 160;
 
 interface AeonStore {
@@ -121,6 +135,10 @@ interface AeonStore {
   openConfirm: (a: ActionView) => void;
   closeConfirm: () => void;
 
+  // Command palette (⌘K).
+  commandPaletteOpen: boolean;
+  setCommandPaletteOpen: (b: boolean) => void;
+
   // Cycle history (persistent timeline).
   cycles: CycleHistoryView[];
   refreshCycles: () => Promise<void>;
@@ -132,6 +150,17 @@ interface AeonStore {
   chatLoading: boolean;
   refreshChat: () => Promise<void>;
   sendChat: (message: string, opts: { useHistory: boolean; useWebSearch: boolean }) => Promise<void>;
+
+  // Inter-agent message bus.
+  agentMessages: AgentMessageView[];
+  refreshAgentMessages: () => Promise<void>;
+  sendAgentMessage: (
+    from: string,
+    to: string,
+    kind: AgentMessageKind,
+    subject: string,
+    body: string,
+  ) => Promise<void>;
 
   dispatch: (input: string, context?: string) => Promise<OrchestrationResult | null>;
   refreshActions: () => Promise<void>;
@@ -165,6 +194,8 @@ export const useAeon = create<AeonStore>((set, get) => ({
     });
     // Side-load cycle history (non-blocking).
     void get().refreshCycles();
+    // Side-load agent-to-agent message bus (non-blocking).
+    void get().refreshAgentMessages();
   },
   refresh: async () => {
     const res = await fetch("/api/aeon/status");
@@ -285,6 +316,9 @@ export const useAeon = create<AeonStore>((set, get) => ({
   openConfirm: (a) => set({ confirmAction: a }),
   closeConfirm: () => set({ confirmAction: null }),
 
+  commandPaletteOpen: false,
+  setCommandPaletteOpen: (b) => set({ commandPaletteOpen: b }),
+
   dispatch: async (input, context) => {
     set({ orchestrating: true, phase: "PERCEIVE" });
     try {
@@ -390,6 +424,45 @@ export const useAeon = create<AeonStore>((set, get) => ({
       console.error("chat failed", e);
     } finally {
       set({ chatLoading: false });
+    }
+  },
+
+  // ─── Inter-agent message bus ───
+  agentMessages: [],
+  refreshAgentMessages: async () => {
+    try {
+      const res = await fetch("/api/aeon/agents/messages?take=50");
+      const data = (await res.json()) as AgentMessageView[];
+      set({ agentMessages: data });
+    } catch {
+      /* ignore */
+    }
+  },
+  sendAgentMessage: async (from, to, kind, subject, body) => {
+    // Optimistic insert so the operator sees their send immediately.
+    const optimistic: AgentMessageView = {
+      id: `tmp-${Date.now()}`,
+      fromAgent: from,
+      toAgent: to,
+      kind,
+      subject,
+      body,
+      read: true,
+      createdAt: new Date().toISOString(),
+    };
+    set((s) => ({ agentMessages: [optimistic, ...s.agentMessages] }));
+    try {
+      await fetch("/api/aeon/agents/messages", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ fromAgent: from, toAgent: to, kind, subject, body }),
+      });
+      // Server may schedule a simulated response — refresh shortly after.
+      setTimeout(() => {
+        void get().refreshAgentMessages();
+      }, 1800);
+    } catch (e) {
+      console.error("sendAgentMessage failed", e);
     }
   },
 }));

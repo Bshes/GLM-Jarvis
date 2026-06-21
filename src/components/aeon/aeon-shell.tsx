@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import {
   Brain, Cpu, Activity, Radar, ShieldCheck, Terminal, Zap, House,
-  Wifi, WifiOff, Radio, ChevronRight, MessageSquare,
+  Wifi, WifiOff, Radio, ChevronRight, MessageSquare, Search,
 } from "lucide-react";
 import { useAeon, type View } from "@/lib/store";
 import { useAeonStream } from "@/hooks/use-aeon-stream";
@@ -25,6 +25,8 @@ import { LogsTerminal } from "@/components/aeon/logs-terminal";
 import TriggersPanel from "@/components/aeon/triggers-panel";
 import { IoTPanel } from "@/components/aeon/iot-panel";
 import { ConsolePanel } from "@/components/aeon/console-panel";
+import { CommandPalette } from "@/components/aeon/command-palette";
+import { MobileBottomNav } from "@/components/aeon/mobile-bottom-nav";
 
 const NAV: { id: View; label: string; icon: React.ElementType; desc: string }[] = [
   { id: "core", label: "Core", icon: Brain, desc: "Cognitive loop" },
@@ -48,12 +50,38 @@ export function AeonShell() {
   const pendingActions = useAeon((s) => s.pendingActions);
   const memoryCount = useAeon((s) => s.memoryCount);
   const stream = useAeon((s) => s.stream);
+  const setCommandPaletteOpen = useAeon((s) => s.setCommandPaletteOpen);
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
+
+  // Global keyboard shortcuts: ⌘K / Ctrl+K toggles the command palette;
+  // number keys 1-9 jump to views (when not typing in an input).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement)?.tagName;
+      const typing = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable;
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+        return;
+      }
+      if (typing) return;
+      if (e.key >= "1" && e.key <= "9") {
+        const idx = Number(e.key) - 1;
+        if (idx < NAV.length) {
+          e.preventDefault();
+          setView(NAV[idx].id);
+        }
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setCommandPaletteOpen, setView]);
 
   const latest = stream[0];
   const activeAgents = useAeon((s) => s.agents.length);
@@ -115,6 +143,25 @@ export function AeonShell() {
               {orchestrating && <Radio className="h-3 w-3 animate-pulse text-[var(--aeon-core)]" />}
             </div>
 
+            {/* command palette trigger */}
+            <button
+              onClick={() => setCommandPaletteOpen(true)}
+              className="hidden items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2.5 py-1 text-xs text-muted-foreground transition hover:border-[var(--aeon-core)]/50 hover:text-foreground md:inline-flex"
+              title="Open command palette (⌘K)"
+            >
+              <Search className="h-3.5 w-3.5 text-[var(--aeon-core)]" />
+              <span>Command</span>
+              <kbd className="rounded-sm border border-border/60 bg-background/60 px-1 font-mono text-[9px]">⌘K</kbd>
+            </button>
+            <button
+              onClick={() => setCommandPaletteOpen(true)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/60 bg-background/40 text-[var(--aeon-core)] transition hover:border-[var(--aeon-core)]/50 md:hidden"
+              title="Command palette (⌘K)"
+              aria-label="Open command palette"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+
             {/* clock */}
             <div className="hidden font-mono text-sm tabular-nums text-foreground sm:block">
               {clockString(now)}
@@ -125,8 +172,8 @@ export function AeonShell() {
 
       {/* ===== Body ===== */}
       <div className="flex min-h-0 flex-1">
-        {/* sidebar nav */}
-        <nav className="sticky top-14 z-20 flex h-[calc(100vh-3.5rem)] w-16 shrink-0 flex-col border-r border-border bg-background/60 py-3 md:w-52">
+        {/* sidebar nav — desktop only (mobile uses MobileBottomNav below) */}
+        <nav className="sticky top-14 z-20 hidden h-[calc(100vh-3.5rem)] w-16 shrink-0 flex-col border-r border-border bg-background/60 py-3 md:flex md:w-52">
           {NAV.map((item) => {
             const active = view === item.id;
             const Icon = item.icon;
@@ -190,6 +237,11 @@ export function AeonShell() {
         </main>
       </div>
 
+      {/* ===== Mobile bottom navigation (above the footer, below the body) =====
+          Renders only below md. The body row above is `flex-1` so it pushes
+          this bar + the footer to the bottom of the viewport; no overlap. */}
+      <MobileBottomNav />
+
       {/* ===== Sticky footer ===== */}
       <footer className="mt-auto border-t border-border bg-background/95 backdrop-blur-md">
         <div className="flex h-9 items-center gap-3 px-3 md:px-5">
@@ -229,6 +281,9 @@ export function AeonShell() {
           },
         }}
       />
+
+      {/* ⌘K command palette */}
+      <CommandPalette />
     </div>
   );
 }

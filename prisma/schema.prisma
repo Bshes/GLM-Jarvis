@@ -186,3 +186,18 @@ model ChatTurn {
 
   @@index([createdAt])
 }
+
+/// An inter-agent message on the collaboration bus.
+model AgentMessage {
+  id        String   @id @default(cuid())
+  fromAgent String
+  toAgent   String // specific agent name, or "broadcast"
+  kind      String // delegate | status | result | query | response
+  subject   String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([toAgent])
+  @@index([createdAt])
+}

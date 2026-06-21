@@ -404,3 +404,146 @@ Stage Summary:
   visualization, real VLM image analysis, OAuth multi-user, mobile bottom-nav,
   cycle history search/filter, console conversation export, dark/light theme
   toggle, keyboard shortcuts.
+
+---
+Task ID: FEATURE-2
+Agent: full-stack-developer (mobile bottom-nav)
+Task: Added a native-app-style mobile bottom navigation bar to AeonShell so the app is genuinely usable on phones. Below `md` (768px) the left sidebar is hidden and a horizontally-scrollable bottom rail of 9 icon+label buttons takes over; desktop layout is unchanged.
+
+Work Log:
+- Read worklog.md (project status + conventions: aeon palette, aeon-scroll, framer-motion, lucide-react, NO indigo/blue) and re-read `src/components/aeon/aeon-shell.tsx` + `src/lib/store.ts` (View union, useAeon selectors) + the `aeon-scroll`/`--aeon-core`/`animate-aeon-pulse` definitions in globals.css.
+- Created `src/components/aeon/mobile-bottom-nav.tsx` exporting `MobileBottomNav`. It reads `view` + `setView` from `useAeon`, renders a `md:hidden` rail (`role=navigation`, `aria-label="Primary navigation"`) with `overflow-x-auto aeon-scroll` containing all 9 buttons in spec order: Core/Brain, Agents/Cpu, Memory/Activity, Sensory/Radar, Actions/ShieldCheck, Triggers/Zap, IoT/House, Console/MessageSquare, Logs/Terminal.
+  • Each button is 68px wide (`w-[4.25rem]`) with a h-14 column: lucide icon (18px) + mono 9px uppercase label.
+  • Active button: amber `var(--aeon-core)` text, `animate-aeon-pulse` on the icon, a `drop-shadow` glow via `color-mix`, a top accent line (`motion.span` with `layoutId="mobile-nav-active"` so the bar slides between buttons), and `aria-current="page"`.
+  • Inactive buttons: `text-muted-foreground` with `hover:text-foreground`.
+  • `paddingBottom: env(safe-area-inset-bottom)` inline style for iOS home-indicator safety.
+  • `useEffect` on `view` calls `scrollIntoView({ inline: "center", block: "nearest" })` so the active button is auto-centered when it changes (9 buttons don't all fit on a 375px phone).
+  • Rail is `sticky bottom-0 z-40` so it stays pinned to the bottom of the viewport during page scroll on long views (CoreView's cycle timeline makes the page scroll on mobile).
+- Integrated into `aeon-shell.tsx`:
+  • Imported `MobileBottomNav`.
+  • Sidebar `<nav>` className changed from `flex ... md:w-52` → `hidden ... md:flex md:w-52` so it's desktop-only (mobile uses the bottom-nav).
+  • Rendered `<MobileBottomNav />` as a flex-col sibling BETWEEN the body row and the `<footer>`. Because the body row is `flex-1`, it pushes both the bottom-nav and the `mt-auto` footer to the bottom of the `min-h-screen` flex-col root — bottom-nav sits directly above the footer, no overlap, no fixed positioning needed. `md:hidden` collapses it to 0 height on desktop so desktop layout is byte-identical to before.
+  • Header untouched (phase pills already `hidden md:flex`; connection indicator always visible; clock is `hidden sm:block` which is the pre-existing behavior — not broken by this change, so left as-is per "only change if broken").
+- Lint: `bun run lint` → 0 errors, 0 warnings. Dev.log shows clean Turbopack compilation.
+- agent-browser verification (375x812 mobile):
+  • Sidebar `offsetWidth=0` (hidden), `display` none on mobile ✓
+  • Bottom-nav visible, full-width (375px), height 57px, anchored at viewport bottom (top 755 / bottom 812) ✓
+  • All 9 buttons present with correct labels; `Core` has `data-active="true"` + `aria-current="page"` ✓
+  • Clicked `Logs` button → view switched (h1 became "LOGS"), active state moved to Logs, rail auto-scrolled ✓
+  • No horizontal page overflow (`scrollWidth === innerWidth === 375`) ✓
+  • Scrolled to bottom: bottom-nav at top 718/bottom 775, footer at top 775/bottom 812 — `gap=0`, no overlap, footer at viewport bottom ✓
+  • VLM (glm-4.6v) confirmed bottom-nav with active amber "CORE" button at the bottom of the screen.
+- agent-browser verification (1440x900 desktop):
+  • Sidebar visible, 208px wide (`md:w-52`), `display: flex` ✓
+  • Bottom-nav `display: none`, height 0 (hidden via `md:hidden`) ✓
+  • Footer visible at end of document ✓
+  • No regressions — desktop layout byte-identical to pre-feature.
+
+Stage Summary:
+- Files created: `src/components/aeon/mobile-bottom-nav.tsx` (MobileBottomNav — sticky bottom-0, md:hidden, horizontally-scrollable 9-button rail with active glow + top accent + safe-area inset + auto-scroll-to-active).
+- Files edited: `src/components/aeon/aeon-shell.tsx` (import MobileBottomNav; sidebar `hidden md:flex`; render `<MobileBottomNav />` between body and footer).
+- Mobile (<768px): sidebar hidden, sticky bottom-nav with all 9 views visible above the sticky footer; no overlap, no horizontal overflow, touch-friendly 56px-tall buttons, safe-area-respecting.
+- Desktop (≥768px): byte-identical to before — sidebar visible, no bottom-nav.
+- `bun run lint` clean. Dev server compiles cleanly.
+
+---
+Task ID: FEATURE-1
+Agent: full-stack-developer (agent messaging)
+Task: Implemented inter-agent messaging — agents can send each other messages (delegation, collaboration, status updates), with the operator seeing the full message bus in the Agents panel. Fulfills the "richer agent collaboration (agent-to-agent messaging)" next-phase item.
+
+Work Log:
+- Read worklog.md + prisma/schema.prisma + src/lib/store.ts + src/lib/aeon.ts + src/lib/logger.ts + src/components/aeon/agents-panel.tsx + src/components/aeon/ui.tsx + src/lib/db.ts + the cycles & chat API routes to lock in conventions (HUD palette, aeon-scroll, serialize helper, dynamic="force-dynamic", emitEvent/logger pattern, optimistic-update store pattern, AgentGlyph static-component wrapper).
+- Added `AgentMessage` Prisma model (id/fromAgent/toAgent/kind/subject/body/read/createdAt + @@index([toAgent]) + @@index([createdAt])) to `prisma/schema.prisma`. Ran `bun run db:push` (db synced) + `bun run db:generate` + touched `src/lib/db.ts` to invalidate the cached PrismaClient.
+- Created `src/app/api/aeon/agents/messages/route.ts` with:
+  • GET — lists recent messages (take=50 default, max 100), ordered desc. Optional `?agent=Name` filters to messages where that agent is sender OR recipient (including "broadcast").
+  • POST — validates {fromAgent, toAgent, kind, subject, body} and `kind ∈ {delegate,status,result,query,response}`, persists the message, emits a `logger.info` + `emitEvent` agent event, and — when kind is `delegate` or `query` — schedules a simulated auto-response from the target agent(s) after ~1.5s. For broadcast, every known agent (queried from db.agent) replies, staggered 700ms apart, none replying to itself.
+  • Auto-reply bodies come from a context-aware `AUTO_REPLY` map per agent (Coder→"Sandbox ready. Drafting implementation…", Researcher→"Crawling fresh sources…", IoT→"Acknowledged — applying device state change…", Financial→"Compiling figures…"), each acknowledging the original subject. Each auto-response is also logged + emitted as an agent event so the live stream picks it up.
+  • PATCH — marks messages as read by `{ids:string[]}` or `{agent:string}`.
+- Edited `src/lib/store.ts`:
+  • Exported `AgentMessageKind` and `AgentMessageView` types.
+  • Added `agentMessages`, `refreshAgentMessages`, `sendAgentMessage` to the store interface + implementation.
+  • `sendAgentMessage` does an optimistic insert at the head (read:true so it doesn't count as unread), POSTs, then schedules a refresh 1.8s later to catch the simulated response.
+  • `bootstrap()` now side-loads the message bus (non-blocking, alongside the existing refreshCycles).
+- Edited `src/components/aeon/agents-panel.tsx` to add a "Message Bus" section below the existing agent grid + dispatch directive card. Preserved the existing structure exactly (Stat header, agent grid with agentIcon/TierBadge/StatusDot, dispatch Textarea) and added:
+  • A bus header strip with Mail icon, "live · N" pill (Radio icon, emerald), an "unread" badge (Inbox icon, danger color), and a Refresh button.
+  • A responsive 2-column layout (`grid-cols-1 lg:grid-cols-[1.6fr_1fr]`): left = scrollable message thread (`aeon-scroll max-h-[460px]`), right = compose form.
+  • `MessageRow` component: left accent strip in the sender's color, from→to header with `AgentGlyph` icon chips (Radio icon for broadcast), kind badge colored per task spec (delegate=warn, status=active, result=core, query=think, response=active), an unread dot (pulsing rose) for `read===false`, and a `timeAgo` timestamp. Body + subject rendered in mono. Framer-motion entrance + exit animations via AnimatePresence.
+  • Compose form: From select (Orchestrator + 4 agents), To select (broadcast + 4 agents), Kind select (5 kinds with kind-colored labels), Subject input, Body textarea, Send button (disabled until subject+body present). When kind ∈ {delegate, query}, a hint shows "X will auto-reply (~1.5s)." or "Each agent will auto-reply (~1.5s)." for broadcast.
+  • Auto-refresh every 4s while the panel is mounted (`setInterval` + cleanup).
+  • New-response toast: tracks seen message IDs in a ref; on each refresh, any new `kind==="response"` fires a `sonner` toast with `fromAgent → toAgent · response` title and the body as description.
+  • Replaced the old `agentIcon()` call with a local `AGENT_ICONS_LOCAL` map + `agentIconSafe()` helper (property access, satisfies `react-hooks/static-components`).
+  • Empty state (`EmptyBus`) with Inbox icon + hint to use the compose form.
+- After schema changes, hit the expected stale-PrismaClient issue: GET /api/aeon/agents/messages returned 500 "Cannot read properties of undefined (reading 'findMany')". `bun run db:generate` + touching db.ts did NOT fix it (the global singleton in the running dev server was still stale). Killed the dev server (`pkill -f "next dev"`) and restarted it in the background — endpoint then returned 200.
+- Verified end-to-end:
+  * `curl -s http://127.0.0.1:3000/api/aeon/agents/messages` → 200 + array.
+  * POST a delegate from Orchestrator → IoT → after 1.5s, IoT auto-responds "Acknowledged — applying device state change for …".
+  * POST a query from Coder → Researcher → Researcher auto-responds "Query acknowledged — searching the web for …".
+  * POST a status to broadcast → no auto-reply (correct: only delegate/query trigger replies).
+  * POST a delegate to broadcast → all 4 agents (Coder, Researcher, IoT, Financial) reply staggered ~700ms apart, none replying to itself.
+  * `?agent=Coder` filter correctly returns both directions.
+- agent-browser verification: opened the app → AGENTS view → compose form (Orchestrator→Coder, delegate, "Plan new feature", "Draft the architecture…") → Send. Toast "Message sent: Orchestrator → Coder [DELEGATE]" appeared, then ~1.5s later a second toast "Coder → Orchestrator · response" with body "Sandbox ready. Drafting implementation…". Thread rendered both messages with from→to glyph chips, DELEGATE/RESPONSE badges, 24s/23s timestamps. Header shows "live · 14" + "14 unread". Auto-refresh polling visible in dev.log every ~4s.
+- Lint: `bun run lint` → 0 errors, 0 warnings. Dev server log: all 200/201 responses, no runtime errors.
+
+Stage Summary:
+- Artifacts: `prisma/schema.prisma` (added AgentMessage model), `src/app/api/aeon/agents/messages/route.ts` (new GET/POST/PATCH), `src/lib/store.ts` (added AgentMessageKind/AgentMessageView types + agentMessages state + refreshAgentMessages + sendAgentMessage + bootstrap side-load), `src/components/aeon/agents-panel.tsx` (added Message Bus section with thread + compose form, auto-refresh, unread indicators, sonner toasts on new responses).
+- Operators can now compose messages from any sender (Orchestrator or any agent) to any recipient (specific agent or broadcast) with kind delegate/status/result/query/response. Delegate + query messages auto-elicit a context-aware simulated response from the target agent(s) ~1.5s later, making the bus feel alive. The thread shows from→to arrows with agent-color glyphs, kind badges, unread dots, and relative timestamps; new responses trigger sonner toasts; the bus auto-refreshes every 4s while the panel is mounted.
+- No other files modified. Lint clean, 0 errors, 0 runtime errors. End-to-end verified via curl + agent-browser.
+
+---
+Task ID: REVIEW-3 (cron webDevReview)
+Agent: orchestrator (Z.ai Code)
+Task: Cron-triggered review — QA, build command palette + keyboard shortcuts, agent-to-agent messaging, mobile bottom-nav.
+
+Work Log:
+- Reviewed worklog.md: A.E.O.N. had 9 polished views (all 8-9/10 VLM-rated), stable.
+- Pre-flight: dev server + stream service up, home 200, lint clean.
+- agent-browser QA: all 9 views render with 0 errors. No bugs to fix → built new features.
+
+New features built this round:
+1. **Command Palette (⌘K)** — built by orchestrator:
+   - `src/components/aeon/command-palette.tsx`: fuzzy-search command console with 3 groups:
+     Navigate (9 views, each with number shortcut badge), Quick Dispatch (6 tier-tagged
+     directives that run a full orchestration cycle), System Actions (re-seed, sync, run
+     trigger evaluation, clear stream).
+   - Fuzzy subsequence matcher scoring; arrow-key navigation + Enter to select + Esc to close.
+   - Grouped results with colored group headers (navigate=active, dispatch=core, system=warn).
+   - Selected row has amber inset glow + corner-enter hint.
+   - Store additions: `commandPaletteOpen`, `setCommandPaletteOpen`.
+   - Header: ⌘K trigger button (desktop pill + mobile icon) added to status bar.
+2. **Global keyboard shortcuts** — wired in aeon-shell:
+   - ⌘K / Ctrl+K → open command palette (works even while typing).
+   - Number keys 1-9 → jump to corresponding view (only when not typing in an input).
+   - Smart input-detection (INPUT/TEXTAREA/contentEditable) prevents shortcuts while typing.
+3. **Agent-to-agent messaging** — built by subagent (FEATURE-1):
+   - Prisma `AgentMessage` model (fromAgent, toAgent, kind, subject, body, read) + pushed.
+   - `/api/aeon/agents/messages` GET/POST/PATCH; POST with kind delegate/query schedules a
+     simulated auto-response (~1.5s later, context-aware body per agent). Broadcast fans out.
+   - Store: `agentMessages`, `refreshAgentMessages`, `sendAgentMessage`; bootstrap side-loads.
+   - Agents panel: "Inter-Agent Message Bus" section — two-column thread + compose form,
+     agent-color accents, kind badges (delegate=warn, status=active, result=core, query=think,
+     response=active), unread dots, 4s auto-refresh, sonner toasts on new responses.
+4. **Mobile bottom-nav** — built by subagent (FEATURE-2):
+   - `src/components/aeon/mobile-bottom-nav.tsx`: sticky bottom rail (md:hidden), 9 horizontally-
+     scrollable icon buttons, active state with amber glow + sliding top accent (layoutId) +
+     animate-aeon-pulse, safe-area-inset padding, auto-scrollIntoView on view change.
+   - aeon-shell: sidebar nav now `hidden md:flex` (desktop-only); MobileBottomNav rendered
+     before the footer so the sticky footer stays last with zero overlap.
+
+Verification (agent-browser):
+- ⌘K opens palette → typed "memory" → filtered to "Go to Memory" → Enter navigated to Memory view.
+- Number keys: pressed 7 → IoT view; pressed 2 → Agents view. Both worked.
+- Agent messaging: filled compose (subject + body) → Send → delegate persisted → Coder auto-
+  replied with "response" kind ~1.5s later. Verified via API: both messages in DB.
+- Mobile 375x812: sidebar hidden, bottom-nav visible with all 9 buttons, no horizontal overflow,
+  footer pushes naturally (bodyH 1231). Desktop 1440x900: sidebar 208px, unchanged.
+- VLM rated command palette 8/10 ("Clear, functional, good contrast and organization").
+- Lint clean (0 errors), 0 runtime errors across all 9 views.
+
+Stage Summary:
+- A.E.O.N. now has a ⌘K command palette with fuzzy search + quick dispatch + system actions,
+  global keyboard shortcuts (⌘K palette, 1-9 view jump), an inter-agent message bus with
+  simulated auto-replies, and a native-app-style mobile bottom-nav.
+- All features verified end-to-end via agent-browser. Lint clean, 0 errors, responsive verified.
+- Unresolved / next-phase: vector memory visualization, real VLM image analysis on camera
+  frames, OAuth multi-user, cycle history search/filter, console conversation export,
+  dark/light theme toggle, notification center / activity inbox.
